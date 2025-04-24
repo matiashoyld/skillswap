@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { MessageSquare, Star, Users } from "lucide-react";
 
 import { LatestPost } from "~/app/_components/post";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
@@ -10,44 +13,115 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-gray-900">
+        <header className="py-6 px-4 bg-[#D5E8E9]">
+          <nav className="container mx-auto flex justify-between items-center">
+            <div className="flex items-center">
+              <Link href="/">
+                <span className="text-xl font-bold text-gray-900">SkillSwap</span>
+              </Link>
+            </div>
+            <div className="space-x-4">
+              <Link href="/auth/login">
+                <Button variant="ghost">Log in</Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button>Sign up</Button>
+              </Link>
+            </div>
+          </nav>
+        </header>
 
-          <LatestPost />
-        </div>
-      </main>
+        <main>
+          <section className="py-20 px-4 bg-[#D5E8E9] relative overflow-hidden">
+            <div className="container mx-auto text-center relative z-10">
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+                Level Up Your Career with Peer Feedback
+              </h1>
+              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Join a community of professionals helping each other improve through actionable feedback on resumes, portfolios, and more.
+              </p>
+              <Link href="/auth/signup">
+                <Button
+                  size="lg"
+                  className="text-lg px-8 py-4"
+                >
+                  Start Now
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          <section className="py-16 px-4 bg-white">
+            <div className="container mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Expert Feedback</h3>
+                    <p className="text-gray-600">
+                      Get detailed feedback from professionals in your field
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                      <Star className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Credit System</h3>
+                    <p className="text-gray-600">
+                      Earn credits by helping others, spend them on feedback
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Active Community</h3>
+                    <p className="text-gray-600">
+                      Join specialized communities for targeted feedback
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+
+          <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-indigo-50">
+            <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-gray-900">
+                  Latest Activity
+                </h2>
+                <p className="mx-auto max-w-[600px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  See the latest posts and interactions within the community.
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-4 mt-4">
+                <p className="text-lg font-medium text-gray-700">
+                  Server says: {hello ? hello.greeting : "Loading..."}
+                </p>
+                <div className="w-full max-w-md p-4 border rounded-lg bg-white shadow-sm">
+                  <h4 className="font-semibold mb-2 text-gray-800">Recent Post:</h4>
+                  <LatestPost />
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+
+        <footer className="bg-white py-12 px-4">
+          <div className="container mx-auto text-center text-gray-600">
+            <p>© {new Date().getFullYear()} SkillSwap. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
     </HydrateClient>
   );
 }
