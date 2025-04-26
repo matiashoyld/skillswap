@@ -1,20 +1,15 @@
 import Link from "next/link";
 import { MessageSquare, Star, Users } from "lucide-react";
 
-import { LatestPost } from "~/app/_components/post";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-
-  void api.post.getLatest.prefetch();
-
   return (
     <HydrateClient>
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-gray-900">
-        <header className="py-6 px-4 bg-[#D5E8E9]">
+      <div className="min-h-screen bg-gradient-to-b from-[var(--indigo-50)] to-white text-gray-900">
+        <header className="py-6 px-4 bg-[var(--skillswap-light)]">
           <nav className="container mx-auto flex justify-between items-center">
             <div className="flex items-center">
               <Link href="/">
@@ -33,7 +28,7 @@ export default async function Home() {
         </header>
 
         <main>
-          <section className="py-20 px-4 bg-[#D5E8E9] relative overflow-hidden">
+          <section className="py-20 px-4 bg-[var(--skillswap-light)] relative overflow-hidden">
             <div className="container mx-auto text-center relative z-10">
               <h1 className="text-5xl font-bold text-gray-900 mb-6">
                 Level Up Your Career with Peer Feedback
@@ -57,7 +52,7 @@ export default async function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <Card>
                   <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
                       <MessageSquare className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Expert Feedback</h3>
@@ -68,7 +63,7 @@ export default async function Home() {
                 </Card>
                 <Card>
                   <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
                       <Star className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Credit System</h3>
@@ -79,7 +74,7 @@ export default async function Home() {
                 </Card>
                 <Card>
                   <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 rounded-full bg-[#351F0E] flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Active Community</h3>
@@ -92,7 +87,7 @@ export default async function Home() {
             </div>
           </section>
 
-          <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-indigo-50">
+          <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-[var(--indigo-50)]">
             <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
               <div className="space-y-3">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-gray-900">
@@ -103,13 +98,7 @@ export default async function Home() {
                 </p>
               </div>
               <div className="flex flex-col items-center gap-4 mt-4">
-                <p className="text-lg font-medium text-gray-700">
-                  Server says: {hello ? hello.greeting : "Loading..."}
-                </p>
-                <div className="w-full max-w-md p-4 border rounded-lg bg-white shadow-sm">
-                  <h4 className="font-semibold mb-2 text-gray-800">Recent Post:</h4>
-                  <LatestPost />
-                </div>
+                {/* Placeholder for latest activity or remove this section */}
               </div>
             </div>
           </section>

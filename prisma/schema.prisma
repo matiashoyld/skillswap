@@ -8,11 +8,16 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id          String    @id @default(cuid()) // Unique ID for Supabase row
+  clerkUserId String    @unique // Stores the unique Clerk User ID
+  email       String    @unique // Stores the primary email from Clerk
+  firstName   String?            // Optional: Store first name
+  lastName    String?            // Optional: Store last name
+  imageUrl    String?            // Optional: Store profile image URL
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@index([name])
+  // Optional: Add relation to Post if users create posts
+  // posts Post[] 
 }
