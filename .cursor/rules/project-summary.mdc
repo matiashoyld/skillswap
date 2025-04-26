@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Summary: SkillSwap (T3 Stack Base)
+
+This document summarizes the key technologies, architectural patterns, and file structure conventions used in this project.
+
+## Core Technologies
+
+*   **Framework:** Next.js (App Router)
+*   **Language:** TypeScript
+*   **UI Library:** React
+*   **Styling:** Tailwind CSS
+*   **UI Components:** [shadcn/ui](mdc:https:/ui.shadcn.com) (e.g., Button, Card)
+*   **Authentication:** Clerk
+*   **Database:** Supabase (PostgreSQL)
+*   **ORM:** Prisma
+*   **Deployment:** Vercel
+
+## Key Files & Structure
+
+*   **Prisma Schema:** Defines database models (e.g., `User`). Located at [prisma/schema.prisma](mdc:prisma/schema.prisma).
+*   **Global Styles & Custom CSS:** Contains Tailwind setup and custom CSS variables (like `--skillswap-light`, `--skillswap-dark`, `--indigo-50`). Located at [src/styles/globals.css](mdc:src/styles/globals.css).
+*   **Landing Page:** The main public-facing page. Located at [src/app/page.tsx](mdc:src/app/page.tsx).
+*   **Clerk Middleware:** Configures authentication rules (currently public by default). Located at [middleware.ts](mdc:middleware.ts).
+*   **Authentication Pages:**
+    *   **Login:** Uses Clerk's `<SignIn>` component within a catch-all route. Located at [src/app/auth/login/[[...sign-in]]/page.tsx](mdc:src/app/auth/login/[[...sign-in]]/page.tsx).
+    *   **Signup:** Uses Clerk's `<SignUp>` component within a catch-all route. Located at [src/app/auth/signup/[[...sign-up]]/page.tsx](mdc:src/app/auth/signup/[[...sign-up]]/page.tsx).
+*   **Clerk/Supabase Sync Webhook:** Handles `user.created` events from Clerk to create users in Supabase via Prisma. Located at [src/app/api/webhooks/clerk/route.ts](mdc:src/app/api/webhooks/clerk/route.ts).
+*   **Prisma Client Instance:** Likely defined in [src/server/db.ts](mdc:src/server/db.ts) (verify path if different).
+*   **Environment Variables:** Defined in `.env` locally and configured in Vercel project settings. Includes `DATABASE_URL`, `DIRECT_URL`, Clerk keys (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`), and `CLERK_WEBHOOK_SECRET`. See `.env.example` for structure.
+
+## Conventions & Patterns
+
+*   Uses T3 Stack principles as a base.
+*   Leverages Clerk's pre-built components for auth UI (`<SignIn>`, `<SignUp>`).
+*   Uses Clerk Webhooks for syncing user data to the database asynchronously.
+*   Uses `shadcn/ui` components, potentially customized via global CSS variables.
+*   Database migrations managed via `prisma migrate`.
+*   Environment variables validated using Zod schema in [src/env.js](mdc:src/env.js).
