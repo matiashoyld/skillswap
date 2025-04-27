@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Project Summary: SkillSwap (T3 Stack Base)
 
-This document summarizes the key technologies, architectural patterns, and file structure conventions used in this project.
+SkillSwap is a peer-to-peer feedback platform designed for job candidates. It allows users to request and provide feedback on job application materials like resumes, portfolios, LinkedIn profiles, cover letters, and cold emails within specific professional communities. The platform operates on a credit-based system to incentivize participation and quality feedback.
 
 ## Core Technologies
 
@@ -17,26 +17,34 @@ This document summarizes the key technologies, architectural patterns, and file 
 *   **Authentication:** Clerk
 *   **Database:** Supabase (PostgreSQL)
 *   **ORM:** Prisma
+*   **API Layer:** tRPC (integrated with Next.js App Router)
 *   **Deployment:** Vercel
 
 ## Key Files & Structure
 
-*   **Prisma Schema:** Defines database models (e.g., `User`). Located at [prisma/schema.prisma](mdc:prisma/schema.prisma).
-*   **Global Styles & Custom CSS:** Contains Tailwind setup and custom CSS variables (like `--skillswap-light`, `--skillswap-dark`, `--indigo-50`). Located at [src/styles/globals.css](mdc:src/styles/globals.css).
-*   **Landing Page:** The main public-facing page. Located at [src/app/page.tsx](mdc:src/app/page.tsx).
-*   **Clerk Middleware:** Configures authentication rules (currently public by default). Located at [middleware.ts](mdc:middleware.ts).
+*   **Prisma Schema:** Defines database models (e.g., `User` with specific Clerk fields `clerkUserId`, `firstName`, `lastName`, `imageUrl`, `email`). Located at [prisma/schema.prisma](mdc:prisma/schema.prisma).
+*   **Global Styles & Custom CSS:** Contains Tailwind setup and custom CSS variables. Located at [src/styles/globals.css](mdc:src/styles/globals.css).
+*   **Clerk Middleware:** Configures authentication rules and makes auth context available. **Located at [src/middleware.ts](mdc:src/middleware.ts)**.
+*   **tRPC Setup:**
+    *   Context creation, base procedures (public/protected): [src/server/api/trpc.ts](mdc:src/server/api/trpc.ts)
+    *   Root application router (merges other routers): [src/server/api/root.ts](mdc:src/server/api/root.ts)
+    *   Individual feature routers (e.g., user, feedback, community): `src/server/api/routers/`
 *   **Authentication Pages:**
-    *   **Login:** Uses Clerk's `<SignIn>` component within a catch-all route. Located at [src/app/auth/login/[[...sign-in]]/page.tsx](mdc:src/app/auth/login/[[...sign-in]]/page.tsx).
-    *   **Signup:** Uses Clerk's `<SignUp>` component within a catch-all route. Located at [src/app/auth/signup/[[...sign-up]]/page.tsx](mdc:src/app/auth/signup/[[...sign-up]]/page.tsx).
-*   **Clerk/Supabase Sync Webhook:** Handles `user.created` events from Clerk to create users in Supabase via Prisma. Located at [src/app/api/webhooks/clerk/route.ts](mdc:src/app/api/webhooks/clerk/route.ts).
-*   **Prisma Client Instance:** Likely defined in [src/server/db.ts](mdc:src/server/db.ts) (verify path if different).
-*   **Environment Variables:** Defined in `.env` locally and configured in Vercel project settings. Includes `DATABASE_URL`, `DIRECT_URL`, Clerk keys (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`), and `CLERK_WEBHOOK_SECRET`. See `.env.example` for structure.
+    *   Login: [src/app/auth/login/[[...sign-in]]/page.tsx](mdc:src/app/auth/login/[[...sign-in]]/page.tsx)
+    *   Signup: [src/app/auth/signup/[[...sign-up]]/page.tsx](mdc:src/app/auth/signup/[[...sign-up]]/page.tsx)
+*   **Clerk/Supabase Sync Webhook:** Handles `user.created`/`user.updated` events from Clerk to sync user data (including `clerkUserId`, `firstName`, `lastName`, `imageUrl`, `email`) to Supabase via Prisma. Located at [src/app/api/webhooks/clerk/route.ts](mdc:src/app/api/webhooks/clerk/route.ts).
+*   **Main Dashboard:** The primary user interface after login. Uses Server Components for initial data fetching via tRPC.
+    *   Page (Server Component): [src/app/dashboard/page.tsx](mdc:src/app/dashboard/page.tsx)
+    *   Client Components: `src/app/dashboard/components/`
+*   **Prisma Client Instance:** Defined in [src/server/db.ts](mdc:src/server/db.ts).
+*   **Environment Variables:** Defined in `.env` locally and configured in Vercel project settings. Includes `DATABASE_URL`, `DIRECT_URL`, Clerk keys, and `CLERK_WEBHOOK_SECRET`. See `.env.example` for structure.
 
 ## Conventions & Patterns
 
-*   Uses T3 Stack principles as a base.
-*   Leverages Clerk's pre-built components for auth UI (`<SignIn>`, `<SignUp>`).
-*   Uses Clerk Webhooks for syncing user data to the database asynchronously.
-*   Uses `shadcn/ui` components, potentially customized via global CSS variables.
+*   Uses T3 Stack principles as a base (Next.js, TypeScript, Tailwind, tRPC, Prisma).
+*   Data fetching primarily done in Server Components using tRPC server-side callers.
+*   Client components receive initial data as props.
+*   Clerk middleware (`src/middleware.ts`) provides authentication context for tRPC procedures.
+*   Clerk webhooks ensure user data is synced asynchronously to the Supabase DB.
 *   Database migrations managed via `prisma migrate`.
-*   Environment variables validated using Zod schema in [src/env.js](mdc:src/env.js).
+*   **Development Workaround:** The `user.getCurrent` tRPC procedure ([src/server/api/routers/user.ts](mdc:src/server/api/routers/user.ts)) queries the database by `email` instead of `clerkUserId`. This is because Clerk uses different `userId` values in development vs. production, and the webhook only syncs the production ID. Querying by the consistent email allows finding users locally. Consider using `clerk webhook tunnel` or `ngrok` for local webhook testing in the future.
