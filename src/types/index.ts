@@ -184,13 +184,14 @@ export type AvailableRequestItem = {
 // Specific type for the user object returned by user.getCurrent and used in Dashboard
 export type DashboardUser = {
   id: string;
-  clerkUserId: string;
+  clerkUserId: string | null; // Allow null initially
   email: string;
   firstName: string | null;
   lastName: string | null;
   imageUrl: string | null;
   credits: number;
   name: string | null; // Added computed name field
+  hasCompletedOnboarding: boolean;
 };
 
 // Specific type for the community object returned by community.list and used in Dashboard/Onboarding

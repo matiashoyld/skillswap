@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from 'next/navigation'
 // Remove useApp import
 // import { useApp } from "@/contexts/app-context"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
@@ -10,18 +11,35 @@ import { Users, Sparkles, ChevronRight, Check, CheckCircle } from "lucide-react"
 // Use relative path for types
 // Import the specific DashboardCommunity type
 import type { DashboardCommunity } from "../../../types"
+import { api } from "../../../trpc/react"; // Import tRPC API
 
 // Define props
 type OnboardingFlowProps = {
   communities: DashboardCommunity[]; // Expecting DashboardCommunity type
-  onComplete: () => void;
 };
 
-export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ communities }: OnboardingFlowProps) {
   // Removed useApp hook
   // const { state, joinCommunity } = useApp()
+  const router = useRouter(); // Initialize router
   const [step, setStep] = useState(1)
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>([])
+
+  // tRPC mutation hook
+  const completeOnboardingMutation = api.user.completeOnboarding.useMutation({
+    onSuccess: () => {
+      // On successful mutation, refresh the page data
+      router.refresh();
+      // The page will re-render, and since hasCompletedOnboarding is now true,
+      // the main dashboard will be shown instead of this dialog.
+    },
+    onError: (error) => {
+      // Handle errors (e.g., show a toast notification)
+      console.error("Failed to complete onboarding:", error);
+      // Consider adding user-facing error feedback here
+      alert(`Error completing onboarding: ${error.message}`); // Simple alert for now
+    },
+  });
 
   const handleCommunityToggle = (communityId: string) => {
     setSelectedCommunities((prev) =>
@@ -30,13 +48,8 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
   }
 
   const handleComplete = () => {
-    // Removed joinCommunity call - needs tRPC mutation
-    // selectedCommunities.forEach((communityId) => {
-    //   joinCommunity(communityId)
-    // })
-    // TODO: Add tRPC mutation call here to join communities
-    onComplete() // Call the callback provided by the parent
-    // router.push("/dashboard"); // Navigation is handled by onComplete callback now
+    // Call the tRPC mutation
+    completeOnboardingMutation.mutate({ communityIds: selectedCommunities });
   }
 
   // Use communities prop directly for loading state check
@@ -179,10 +192,12 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                 <Button
                   variant="default"
                   onClick={handleComplete}
+                  // Disable button while mutation is in progress
+                  disabled={completeOnboardingMutation.isPending}
                   className="flex items-center bg-brand-primary hover:bg-brand-primary/90"
                 >
-                  Get Started
-                  <ChevronRight className="ml-1 h-4 w-4" />
+                  {completeOnboardingMutation.isPending ? "Saving..." : "Get Started"}
+                  {!completeOnboardingMutation.isPending && <ChevronRight className="ml-1 h-4 w-4" />}
                 </Button>
               </div>
             </div>

@@ -43,12 +43,13 @@ enum FeedbackEvaluationRating {
 
 model User {
   id             String  @id @default(cuid())
-  clerkUserId    String  @unique
+  clerkUserId    String?  @unique // Can be null initially if webhook fails/delays
   email          String  @unique
   firstName      String?
   lastName       String?
   imageUrl       String?
-  credits        Int     @default(3)
+  credits        Int     @default(0)
+  hasCompletedOnboarding Boolean @default(false) // Added for onboarding tracking
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
