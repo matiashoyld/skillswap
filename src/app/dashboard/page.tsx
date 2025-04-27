@@ -1,14 +1,14 @@
 import { Dashboard } from "./components/dashboard";
 import { createCaller } from "../../server/api/root"; // Relative path
 import { createTRPCContext } from "../../server/api/trpc"; // Relative path
-import { auth } from "@clerk/nextjs/server"; // Need auth to create context
 
 export default async function DashboardPage() {
   // 1. Create context and caller for server-side tRPC
   // We need to pass the auth object to createTRPCContext
   // Note: If createTRPCContext internally calls auth(), this might be redundant,
   // but let's follow the pattern seen in create-t3-app for RSC callers.
-  const context = await createTRPCContext({ auth: auth() });
+  // Remove argument: context creation is now handled internally
+  const context = await createTRPCContext();
   const caller = createCaller(context);
 
   // 2. Fetch initial data concurrently

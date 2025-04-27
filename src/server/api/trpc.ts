@@ -26,9 +26,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
  *
  * @see https://trpc.io/docs/server/context
  */
-interface CreateContextOptions {
-  // No need to pass auth object here, we'll get it directly
-}
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -40,7 +37,7 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+const createInnerTRPCContext = async () => {
   const user = await currentUser(); // Await the user promise here
   const authObj = auth();
   // Extract primary email address safely
@@ -61,12 +58,10 @@ const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: {
-  // headers: Headers;
-}) => {
+export const createTRPCContext = async () => {
   // Fetch stuff that depends on the request (like headers if needed)
   // For now, just create the inner context
-  return await createInnerTRPCContext({});
+  return await createInnerTRPCContext();
 };
 
 /**
@@ -149,14 +144,11 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * @see https://trpc.io/docs/server/middlewares
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  // Check userId directly from the context we added
   if (!ctx.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
-      // Ensure userId is non-nullable in protected procedures
-      ...ctx,
       userId: ctx.userId,
     },
   });
@@ -166,7 +158,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * Protected (authenticated) procedure
  *
  * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
- * the session is valid and guarantees `ctx.auth.userId` is non-null.
+ * the session is valid and guarantees `ctx.session.user` is present.
  *
  * @see https://trpc.io/docs/procedures
  * @see https://trpc.io/docs/server/middlewares

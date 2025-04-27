@@ -1,8 +1,6 @@
-import { Webhook } from 'svix';
-import { headers } from 'next/headers';
-import { type WebhookEvent } from '@clerk/nextjs/server';
-import { db } from '~/server/db'; // Assuming your Prisma client is exported from here
-import { NextResponse } from 'next/server';
+import type { WebhookEvent } from "@clerk/nextjs/server";
+import { Webhook } from "svix";
+import { db } from "~/server/db";
 
 export async function POST(req: Request) {
   // Get the necessary headers

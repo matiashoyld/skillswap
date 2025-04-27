@@ -142,4 +142,61 @@ export const RATING_REWARDS: Record<FeedbackRating, number> = {
   3: 0, // Okay
   2: -1, // Not Helpful
   1: -2, // Harmful / Not Useful
+};
+
+
+// --- Dashboard Component Types ---
+
+// Type for data shown in "My Requests" list on dashboard
+export type MyRequestItem = {
+  id: string;
+  type: RequestType;
+  status: RequestStatus;
+  createdAt: Date;
+  feedbackCount: number;
+  context?: string;
+};
+
+// Type for data shown in "Available Requests" list (Give Feedback tab)
+export type AvailableRequestItem = {
+  id: string;
+  type: RequestType;
+  status: RequestStatus;
+  createdAt: Date;
+  requester: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+  }; // Note: Consider if the full User type is better here
+  communityId: string;
+  communityName: string;
+  context?: string;
+};
+
+// Simplified/specific user type used for the dashboard props
+// We use the base PrismaUser structure from the exported User type
+// export type CurrentDashboardUser = User & {
+//   // credits are already part of PrismaUser
+//   // We can add other dashboard-specific fields if needed
+//   // e.g., onboardingComplete: boolean;
+// }; 
+
+// Specific type for the user object returned by user.getCurrent and used in Dashboard
+export type DashboardUser = {
+  id: string;
+  clerkUserId: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  imageUrl: string | null;
+  credits: number;
+  name: string | null; // Added computed name field
+};
+
+// Specific type for the community object returned by community.list and used in Dashboard/Onboarding
+export type DashboardCommunity = {
+  id: string;
+  name: string;
+  description: string | null;
+  memberCount: number; // Added computed memberCount field
 }; 

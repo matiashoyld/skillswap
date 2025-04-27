@@ -1,9 +1,6 @@
-import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "../trpc";
 import { mapPrismaToRequestType, mapPrismaToRequestStatus } from "../../../types"; // Going up one more level
 
@@ -76,7 +73,7 @@ export const feedbackRouter = createTRPCRouter({
         contentText: true,
         contentUrl: true,
         requester: { // Include minimal requester info if needed (e.g., name)
-          select: { id: true, name: true },
+          select: { id: true, firstName: true, lastName: true },
         },
         targetCommunities: { // Include target community info
           select: {

@@ -7,32 +7,30 @@ import { Badge } from "../../../components/ui/badge"
 import { Button } from "../../../components/ui/button"
 import type {
   RequestType,
-  Community,
-  FeedbackRequest,
-  RequestStatus,
+  AvailableRequestItem,
+  DashboardCommunity,
 } from "../../../types"
 import { FileText, LinkIcon, Mail, Briefcase, FileCheck, Filter } from "lucide-react"
 
 // Define props
 type RequestListProps = {
   // Expecting data fetched in the parent
-  availableRequests: any[]
-  communities: any[]
+  availableRequests: AvailableRequestItem[] // Use imported type
+  communities: DashboardCommunity[] // Use DashboardCommunity type
 }
-
-// Define a more specific type for the request item used in the map function
-type AvailableRequestItem = any
 
 // Renamed from RequestFeed
 export function RequestList({ availableRequests, communities }: RequestListProps) {
-  const [selectedCommunity, setSelectedCommunity] = useState<string | "all">("all")
+  // selectedCommunity can be string (community ID) or 'all'
+  const [selectedCommunity, setSelectedCommunity] = useState<string>("all")
+  // selectedType can be RequestType or 'all'
   const [selectedType, setSelectedType] = useState<RequestType | "all">("all")
 
   // Use availableRequests prop directly - already sorted by backend (oldest first)
   const sortedRequests = availableRequests
 
   // Filter requests by community and type
-  const filteredRequests = sortedRequests.filter((request: AvailableRequestItem) => {
+  const filteredRequests = sortedRequests.filter((request) => { // Infer type
     // communityId is now directly on the request object from the backend mapping
     const communityMatch = selectedCommunity === "all" || request.communityId === selectedCommunity
     const typeMatch = selectedType === "all" || request.type === selectedType
@@ -86,10 +84,11 @@ export function RequestList({ availableRequests, communities }: RequestListProps
             <select
               className="pl-8 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               value={selectedCommunity}
-              onChange={(e) => setSelectedCommunity(e.target.value as string | "all")}
+              onChange={(e) => setSelectedCommunity(e.target.value)}
             >
               <option value="all">All Communities</option>
-              {communities.map((community: any) => (
+              {/* Use Community type */} 
+              {communities.map((community) => (
                 <option key={community.id} value={community.id}>
                   {community.name}
                 </option>
@@ -126,7 +125,8 @@ export function RequestList({ availableRequests, communities }: RequestListProps
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredRequests.map((request: AvailableRequestItem) => (
+          {/* Use AvailableRequestItem type */} 
+          {filteredRequests.map((request) => (
             <Card key={request.id} className="transition-all duration-200 hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex flex-col space-y-3">
@@ -143,7 +143,7 @@ export function RequestList({ availableRequests, communities }: RequestListProps
 
                   <div>
                     <p className="text-sm text-gray-600 line-clamp-2">
-                      {request.context || "No additional context provided"}
+                      {request.context ?? "No additional context provided"}
                     </p>
                   </div>
 

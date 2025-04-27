@@ -33,17 +33,19 @@ import {
 // Use relative path for types
 import type {
   RequestType,
-  User,
-  Community,
-  FeedbackRequest,
-} from "../../../types" // Assuming this path is correct from src/app/dashboard/components
+  MyRequestItem,
+  AvailableRequestItem,
+  // Import the new specific types
+  DashboardUser,
+  DashboardCommunity,
+} from "../../../types";
 
 // Define simpler component props for now
 type DashboardProps = {
-  initialCurrentUser: any; // Replace with specific type later
-  initialCommunities: any[]; // Replace with specific type later
-  initialMyRequests: any[]; // Replace with specific type later
-  initialAvailableRequests: any[]; // Replace with specific type later
+  initialCurrentUser: DashboardUser; // Use specific dashboard type
+  initialCommunities: DashboardCommunity[]; // Use specific dashboard type
+  initialMyRequests: MyRequestItem[];
+  initialAvailableRequests: AvailableRequestItem[];
 }
 
 // Renamed from FeedDashboard
@@ -137,7 +139,7 @@ export function Dashboard({
             <form onSubmit={handleInvite} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Friend's Email
+                  Friend&apos;s Email
                 </label>
                 <input
                   type="email"
@@ -145,7 +147,7 @@ export function Dashboard({
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   className="w-full p-2 border rounded-md"
-                  placeholder="Enter your friend's email"
+                  placeholder="Enter your friend&apos;s email"
                   required
                 />
               </div>
@@ -213,7 +215,7 @@ export function Dashboard({
                       </CardContent>
                     </Card>
                   ) : (
-                    myRequests.map((request: (typeof myRequests)[number]) => {
+                    myRequests.map((request) => {
                       const feedbackCount = request.feedbackCount
                       return (
                         <Card key={request.id} className="overflow-hidden">
@@ -282,13 +284,13 @@ export function Dashboard({
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={currentUser?.imageUrl ?? undefined} alt={`${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}'s avatar`} />
                           <AvatarFallback>
-                            {currentUser?.firstName?.[0] ?? ''}{currentUser?.lastName?.[0] ?? ''}
+                            {(currentUser?.firstName?.[0] ?? '') + (currentUser?.lastName?.[0] ?? '')}
                             {!currentUser?.firstName && !currentUser?.lastName && <UserCircle className="h-full w-full" />}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-medium text-gray-900">{currentUser.name || "Anonymous User"}</h3>
-                          <p className="text-sm text-gray-500">{currentUser.email}</p>
+                          <h3 className="font-medium text-gray-900">{`${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}`.trim() || "Anonymous User"}</h3>
+                          <p className="text-sm text-gray-500">{currentUser?.email ?? 'No Email'}</p>
                         </div>
                       </div>
                       <div className="relative">
@@ -327,7 +329,7 @@ export function Dashboard({
                     </div>
 
                     <p className="text-sm text-gray-600">
-                      "Hi, I'm a professional looking to give and receive feedback!"
+                      &quot;Hi, I&apos;m a professional looking to give and receive feedback!&quot;
                     </p>
 
                     <Button

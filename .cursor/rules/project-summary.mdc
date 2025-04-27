@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Project Summary: SkillSwap (T3 Stack Base)
 
@@ -52,3 +52,29 @@ SkillSwap is a peer-to-peer feedback platform designed for job candidates. It al
     *   `brand-subtle-bg`: `#D5E8E9`
     *   `brand-dark`: `#351F0E`
 *   **Development Workaround:** The `user.getCurrent` tRPC procedure ([src/server/api/routers/user.ts](mdc:src/server/api/routers/user.ts)) queries the database by `email` instead of `clerkUserId`. This is because Clerk uses different `userId` values in development vs. production, and the webhook only syncs the production ID. Querying by the consistent email allows finding users locally. Consider using `clerk webhook tunnel` or `ngrok` for local webhook testing in the future.
+
+## Additional Learnings & Conventions (Generated from Interaction)
+
+### Centralized Types (`[src/types/index.ts](mdc:src/types/index.ts)`)
+
+*   This file serves as the central hub for shared TypeScript types across the frontend and backend.
+*   It re-exports augmented Prisma types (e.g., `User`, `Community`) potentially adding frontend-specific fields or derived data like `memberCount`.
+*   It defines frontend-friendly union types (e.g., `RequestType`, `RequestStatus`) mapped from Prisma enums using helper functions (e.g., `mapPrismaToRequestType`).
+*   Component-specific data shapes derived from tRPC procedures are also defined and exported here (e.g., `MyRequestItem`, `AvailableRequestItem`, `DashboardUser`, `DashboardCommunity`) to ensure consistency and avoid `any` types in component props. **Important:** Props passed to components should match these specific derived types, reflecting the actual data selected in tRPC procedures, rather than the base Prisma types if fields are omitted.
+
+### tRPC Procedure Details & Data Shapes
+
+*   **Context (`[src/server/api/trpc.ts](mdc:src/server/api/trpc.ts)`):** Provides `db` (Prisma client), `auth` (Clerk auth object), `user` (Clerk user object or null), `userId` (Clerk user ID or null), and `primaryEmail` (user's primary email or null) to procedures. Protected procedures enforce the presence of `userId`. Note: `createTRPCContext` is designed to be called *without* arguments.
+*   **`feedback.getMyRequests` (`[src/server/api/routers/feedback.ts](mdc:src/server/api/routers/feedback.ts)`):** Returns an array matching the `MyRequestItem` type: `{ id, type, status, createdAt, feedbackCount, context }`.
+*   **`feedback.getAvailableRequests` (`[src/server/api/routers/feedback.ts](mdc:src/server/api/routers/feedback.ts)`):** Returns an array matching the `AvailableRequestItem` type: `{ id, type, status, createdAt, requester: { id, firstName, lastName }, communityId, communityName, context }`. Note that `requester` only includes minimal info.
+*   **`user.getCurrent` (`[src/server/api/routers/user.ts](mdc:src/server/api/routers/user.ts)`):** Returns an object matching the `DashboardUser` type: `{ id, clerkUserId, email, firstName, lastName, imageUrl, credits, name }`. Fetches user by `primaryEmail`.
+*   **`community.list` (`[src/server/api/routers/community.ts](mdc:src/server/api/routers/community.ts)`):** Returns an array of `DashboardCommunity` objects: `{ id, name, description, memberCount }`.
+
+### Common Linting/Typing Patterns
+
+*   Avoid using `any`. Define specific types for props and variables, often deriving them from the expected tRPC API response shapes and centralizing them in `[src/types/index.ts](mdc:src/types/index.ts)`.
+*   Use `import type` for importing types when `verbatimModuleSyntax` is enabled (common in newer TypeScript/Next.js setups).
+*   Clean up unused imports and variables flagged by ESLint.
+*   Use HTML entities (e.g., `&apos;`, `&quot;`) for special characters within JSX text content.
+*   Prefer the nullish coalescing operator (`??`) over logical OR (`||`) for providing default values when dealing with potentially `null` or `undefined` values.
+*   Ensure tRPC context creation (`[src/server/api/trpc.ts](mdc:src/server/api/trpc.ts)`, `[src/trpc/server.ts](mdc:src/trpc/server.ts)`, `[src/app/api/trpc/[trpc]/route.ts](mdc:src/app/api/trpc/[trpc]/route.ts)`) matches function signatures (e.g., avoid passing arguments to `createTRPCContext` if it expects none).

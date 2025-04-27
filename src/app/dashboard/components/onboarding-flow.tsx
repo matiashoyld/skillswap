@@ -1,24 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 // Remove useApp import
 // import { useApp } from "@/contexts/app-context"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Badge } from "../../../components/ui/badge"
-import { Users, Sparkles, ChevronRight, Check } from "lucide-react"
+import { Users, Sparkles, ChevronRight, Check, CheckCircle } from "lucide-react"
 // Use relative path for types
-import type { Community } from "../../../types" // Import necessary types
+// Import the specific DashboardCommunity type
+import type { DashboardCommunity } from "../../../types"
 
 // Define props
 type OnboardingFlowProps = {
-  communities: Community[]; // Expecting communities from parent
+  communities: DashboardCommunity[]; // Expecting DashboardCommunity type
   onComplete: () => void;
 };
 
 export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps) {
-  const router = useRouter()
   // Removed useApp hook
   // const { state, joinCommunity } = useApp()
   const [step, setStep] = useState(1)
@@ -113,8 +112,8 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">You're All Set!</h3>
-                <p className="text-gray-600">We've added 3 credits to your account to help you get started</p>
+                <h3 className="text-lg font-semibold mb-2">You&apos;re All Set!</h3>
+                <p className="text-gray-600">We&apos;ve added 3 credits to your account to help you get started</p>
               </div>
 
               <div className="bg-brand-primary rounded-lg p-6 text-white text-center">
@@ -139,6 +138,39 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                   <li className="flex items-start">
                     <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-600">Connect with community members</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Leave feedback on things like:</h4>
+                <ul className="list-disc list-inside ml-4 mt-1">
+                  <li>Resumes &amp; Portfolios</li>
+                  <li>LinkedIn Profiles</li>
+                  <li>Cover Letters &amp; Cold Emails</li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">How to get started:</h4>
+                <ul className="space-y-3">
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>
+                      Join communities relevant to your industry or function to get tailored feedback.
+                    </span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>
+                      Receive credits for giving quality feedback, which you&apos;ll use to request your own.
+                    </span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>
+                      Ready to level up your job application? Let&apos;s go!
+                    </span>
                   </li>
                 </ul>
               </div>
