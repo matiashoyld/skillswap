@@ -81,8 +81,6 @@
   --sidebar-ring: oklch(0.708 0 0);
   
   /* Custom SkillSwap Colors */
-  --skillswap-light: #D5E8E9;
-  --skillswap-dark: #351F0E;
   --indigo-50: #eef2ff; /* Added standard indigo-50 for reference */
 }
 

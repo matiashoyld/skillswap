@@ -14,6 +14,9 @@ import { Button } from "../../../components/ui/button"
 import { Card, CardContent } from "../../../components/ui/card"
 import { Badge } from "../../../components/ui/badge"
 import { Dialog, DialogContent } from "../../../components/ui/dialog"
+// Use correct relative path for Avatar components
+// Try using the ~/ alias for the src directory
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import {
   MessageSquare,
   Plus,
@@ -276,13 +279,13 @@ export function Dashboard({
                   <div className="flex flex-col space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
-                          <img
-                            src={currentUser.avatarUrl || "/placeholder.svg"}
-                            alt={currentUser.name || "User avatar"}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={currentUser?.imageUrl ?? undefined} alt={`${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}'s avatar`} />
+                          <AvatarFallback>
+                            {currentUser?.firstName?.[0] ?? ''}{currentUser?.lastName?.[0] ?? ''}
+                            {!currentUser?.firstName && !currentUser?.lastName && <UserCircle className="h-full w-full" />}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <h3 className="font-medium text-gray-900">{currentUser.name || "Anonymous User"}</h3>
                           <p className="text-sm text-gray-500">{currentUser.email}</p>

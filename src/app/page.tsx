@@ -7,7 +7,7 @@ import { Card, CardContent } from "~/components/ui/card";
 export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--indigo-50)] to-white text-gray-900">
-      <header className="py-6 px-4 bg-[var(--skillswap-light)]">
+      <header className="py-6 px-4 bg-brand-subtle-bg">
         <nav className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <Link href="/">
@@ -26,7 +26,7 @@ export default async function Home() {
       </header>
 
       <main>
-        <section className="py-20 px-4 bg-[var(--skillswap-light)] relative overflow-hidden">
+        <section className="py-20 px-4 bg-brand-subtle-bg relative overflow-hidden">
           <div className="container mx-auto text-center relative z-10">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Level Up Your Career with Peer Feedback
@@ -50,7 +50,7 @@ export default async function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-full bg-brand-dark flex items-center justify-center mx-auto mb-4">
                     <MessageSquare className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Expert Feedback</h3>
@@ -61,7 +61,7 @@ export default async function Home() {
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-full bg-brand-dark flex items-center justify-center mx-auto mb-4">
                     <Star className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Credit System</h3>
@@ -72,7 +72,7 @@ export default async function Home() {
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[var(--skillswap-dark)] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-full bg-brand-dark flex items-center justify-center mx-auto mb-4">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Active Community</h3>

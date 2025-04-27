@@ -58,7 +58,7 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center pb-2">
           <CardTitle className="flex items-center justify-center text-2xl">
-            <Sparkles className="h-6 w-6 text-[#0E3638] mr-2" />
+            <Sparkles className="h-6 w-6 text-brand-primary mr-2" />
             Welcome to SkillSwap
           </CardTitle>
         </CardHeader>
@@ -76,14 +76,14 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                   <button
                     key={community.id}
                     onClick={() => handleCommunityToggle(community.id)}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${selectedCommunities.includes(community.id) ? "border-[#0E3638]" : "border-gray-200 hover:border-gray-300"}`}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${selectedCommunities.includes(community.id) ? "border-brand-primary" : "border-gray-200 hover:border-gray-300"}`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center">
-                        <Users className="h-5 w-5 text-[#0E3638] mr-2" />
+                        <Users className="h-5 w-5 text-brand-primary mr-2" />
                         <h4 className="font-medium">{community.name}</h4>
                       </div>
-                      {selectedCommunities.includes(community.id) && <Check className="h-5 w-5 text-[#0E3638]" />}
+                      {selectedCommunities.includes(community.id) && <Check className="h-5 w-5 text-brand-primary" />}
                     </div>
                     <p className="mt-1 text-sm text-gray-600">{community.description}</p>
                     <div className="mt-2">
@@ -101,7 +101,7 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                   variant="default"
                   onClick={() => setStep(2)}
                   disabled={selectedCommunities.length === 0}
-                  className="flex items-center bg-[#0E3638] hover:bg-[#0E3638]/90 disabled:opacity-50"
+                  className="flex items-center bg-brand-primary hover:bg-brand-primary/90 disabled:opacity-50"
                 >
                   Continue
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -117,7 +117,7 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                 <p className="text-gray-600">We've added 3 credits to your account to help you get started</p>
               </div>
 
-              <div className="bg-[#0E3638] rounded-lg p-6 text-white text-center">
+              <div className="bg-brand-primary rounded-lg p-6 text-white text-center">
                 <Sparkles className="h-12 w-12 mx-auto mb-4" />
                 <h4 className="text-xl font-semibold mb-2">3 Free Credits</h4>
                 <p className="text-white/80">
@@ -147,7 +147,7 @@ export function OnboardingFlow({ communities, onComplete }: OnboardingFlowProps)
                 <Button
                   variant="default"
                   onClick={handleComplete}
-                  className="flex items-center bg-[#0E3638] hover:bg-[#0E3638]/90"
+                  className="flex items-center bg-brand-primary hover:bg-brand-primary/90"
                 >
                   Get Started
                   <ChevronRight className="ml-1 h-4 w-4" />

@@ -84,7 +84,7 @@ export function RequestList({ availableRequests, communities }: RequestListProps
         <div className="flex items-center space-x-2">
           <div className="relative">
             <select
-              className="pl-8 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#0E3638]"
+              className="pl-8 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               value={selectedCommunity}
               onChange={(e) => setSelectedCommunity(e.target.value as string | "all")}
             >
@@ -100,7 +100,7 @@ export function RequestList({ availableRequests, communities }: RequestListProps
 
           <div className="relative">
             <select
-              className="pl-8 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#0E3638]"
+              className="pl-8 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as RequestType | "all")}
             >
@@ -132,7 +132,7 @@ export function RequestList({ availableRequests, communities }: RequestListProps
                 <div className="flex flex-col space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-2">
-                      <Badge variant="default" className="flex items-center space-x-1 bg-[#0E3638]">
+                      <Badge variant="default" className="flex items-center space-x-1 bg-brand-primary">
                         {getRequestTypeIcon(request.type)}
                         <span>{getRequestTypeLabel(request.type)}</span>
                       </Badge>

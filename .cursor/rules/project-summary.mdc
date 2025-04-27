@@ -47,4 +47,8 @@ SkillSwap is a peer-to-peer feedback platform designed for job candidates. It al
 *   Clerk middleware (`src/middleware.ts`) provides authentication context for tRPC procedures.
 *   Clerk webhooks ensure user data is synced asynchronously to the Supabase DB.
 *   Database migrations managed via `prisma migrate`.
+*   **Custom Colors:** Brand colors are defined in [tailwind.config.js](mdc:tailwind.config.js):
+    *   `brand-primary`: `#0E3638`
+    *   `brand-subtle-bg`: `#D5E8E9`
+    *   `brand-dark`: `#351F0E`
 *   **Development Workaround:** The `user.getCurrent` tRPC procedure ([src/server/api/routers/user.ts](mdc:src/server/api/routers/user.ts)) queries the database by `email` instead of `clerkUserId`. This is because Clerk uses different `userId` values in development vs. production, and the webhook only syncs the production ID. Querying by the consistent email allows finding users locally. Consider using `clerk webhook tunnel` or `ngrok` for local webhook testing in the future.
