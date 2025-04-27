@@ -6,11 +6,12 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { db } from "~/server/db";
+import { db } from "../db";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 /**
  * 1. CONTEXT
@@ -19,16 +20,53 @@ import { db } from "~/server/db";
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  *
- * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
- * wrap this and provides the required context.
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC clients
+ * create the actual context based on the request. Upon initialization, NextAuth.js is setup to assign
+ * the session to the context.
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+interface CreateContextOptions {
+  // No need to pass auth object here, we'll get it directly
+}
+
+/**
+ * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
+ * it from here.
+ *
+ * Examples of things you may need it for:
+ * - testing, so we don't have to mock Next.js' req/res
+ * - tRPC's `createSSGHelpers`, where we don't have req/res
+ *
+ * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
+ */
+const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+  const user = await currentUser(); // Await the user promise here
+  const authObj = auth();
+  // Extract primary email address safely
+  const primaryEmail = user?.primaryEmailAddress?.emailAddress ?? null;
+
   return {
     db,
-    ...opts,
+    auth: authObj,
+    user, // Full clerk user object (or null)
+    userId: user?.id, // Clerk User ID (or null)
+    primaryEmail: primaryEmail, // User's primary email (or null)
   };
+};
+
+/**
+ * This is the actual context you will use in your router. It will be used to process every request
+ * that goes through your tRPC endpoint.
+ *
+ * @see https://trpc.io/docs/server/context
+ */
+export const createTRPCContext = async (opts: {
+  // headers: Headers;
+}) => {
+  // Fetch stuff that depends on the request (like headers if needed)
+  // For now, just create the inner context
+  return await createInnerTRPCContext({});
 };
 
 /**
@@ -104,3 +142,33 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Reusable middleware that enforces users are logged in before running the procedure.
+ *
+ * @see https://trpc.io/docs/server/middlewares
+ */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  // Check userId directly from the context we added
+  if (!ctx.userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // Ensure userId is non-nullable in protected procedures
+      ...ctx,
+      userId: ctx.userId,
+    },
+  });
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees `ctx.auth.userId` is non-null.
+ *
+ * @see https://trpc.io/docs/procedures
+ * @see https://trpc.io/docs/server/middlewares
+ */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

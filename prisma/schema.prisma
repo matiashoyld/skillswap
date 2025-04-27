@@ -43,20 +43,20 @@ enum FeedbackEvaluationRating {
 
 model User {
   id             String  @id @default(cuid())
+  clerkUserId    String  @unique
   email          String  @unique
-  name           String?
-  avatarUrl      String? // URL to profile picture
-  googleId       String? @unique
-  linkedInId     String? @unique // Assuming we get a unique ID from LinkedIn OAuth
-  credits        Int     @default(3) // Start with 3 free credits as per PRD
+  firstName      String?
+  lastName       String?
+  imageUrl       String?
+  credits        Int     @default(3)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  communities       UserCommunity[] // Communities the user is part of
-  requestsMade      FeedbackRequest[]      @relation("RequesterRequests") // Requests made by this user
-  responsesGiven    FeedbackResponse[]     @relation("ResponderResponses") // Responses given by this user
-  evaluationsMade   FeedbackEvaluation[]   @relation("EvaluatorEvaluations") // Evaluations made by this user
+  communities       UserCommunity[]
+  requestsMade      FeedbackRequest[]      @relation("RequesterRequests")
+  responsesGiven    FeedbackResponse[]     @relation("ResponderResponses")
+  evaluationsMade   FeedbackEvaluation[]   @relation("EvaluatorEvaluations")
 
   @@index([email])
 }

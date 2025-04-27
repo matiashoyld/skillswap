@@ -1,0 +1,133 @@
+"use client"
+
+import { TrendingUp, Plus, FileText, LucideLink, Mail, Briefcase, FileCheck } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { CREDIT_COSTS, RATING_REWARDS, type RequestType, type User, type FeedbackRating } from "../../../types"
+import NextLink from "next/link"
+
+type CreditBalanceProps = {
+  currentUser: Pick<User, 'id' | 'name' | 'email' | 'credits' | 'avatarUrl'> | null | undefined;
+};
+
+export function CreditBalance({ currentUser }: CreditBalanceProps) {
+  const requestTypes: { type: RequestType; icon: typeof FileText; label: string }[] = [
+    { type: "linkedin", icon: LucideLink, label: "LinkedIn Profile" },
+    { type: "email", icon: Mail, label: "Cold Email" },
+    { type: "resume", icon: FileText, label: "Resume" },
+    { type: "portfolio", icon: Briefcase, label: "Portfolio" },
+    { type: "coverletter", icon: FileCheck, label: "Cover Letter" },
+  ]
+
+  if (!currentUser) {
+    return (
+      <Card className="transition-all duration-300">
+        <CardHeader className="bg-[#D5E8E9] text-[#0E3638]">
+          <CardTitle>Credit Balance</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6 pb-4">
+          <div className="text-center text-gray-500">Loading...</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="transition-all duration-300 hover:shadow-lg">
+      <CardHeader className="bg-[#D5E8E9] text-[#0E3638]">
+        <div className="flex justify-between items-center">
+          <CardTitle>Credit Balance</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6 pb-4">
+        <div className="flex flex-col space-y-6">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Available Credits</span>
+            <span className="text-3xl font-bold text-[#0E3638]">{currentUser.credits}</span>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium text-[#0E3638] mb-2">Request Cost and Rewards</h4>
+              <div className="space-y-2">
+                {requestTypes.map(({ type, icon: Icon, label }) => (
+                  <div key={type} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center">
+                      <Icon className="h-4 w-4 text-[#0E3638] mr-2" />
+                      <span className="text-gray-600">{label}</span>
+                    </div>
+                    <span className="font-medium text-[#0E3638]">{CREDIT_COSTS[type]} credits</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <h4 className="text-sm font-medium text-[#0E3638] mb-2">Feedback Rewards</h4>
+              <div className="space-y-2">
+                {Object.entries(RATING_REWARDS)
+                  .reverse()
+                  .map(([ratingKey, reward]) => {
+                    const rating = parseInt(ratingKey, 10) as FeedbackRating
+                    let ratingLabel = ""
+                    switch (rating) {
+                      case 5:
+                        ratingLabel = "Super Insightful"
+                        break
+                      case 4:
+                        ratingLabel = "Helpful"
+                        break
+                      case 3:
+                        ratingLabel = "Okay"
+                        break
+                      case 2:
+                        ratingLabel = "Not Helpful"
+                        break
+                      case 1:
+                        ratingLabel = "Harmful"
+                        break
+                    }
+
+                    return (
+                      <div key={rating} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center">
+                          <span
+                            className={`inline-flex items-center justify-center w-4 h-4 rounded-full mr-2 text-xs font-semibold ${rating >= 4 ? "bg-green-100 text-green-700" : rating === 3 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}
+                          >
+                            {rating}
+                          </span>
+                          <span className="text-gray-600">{ratingLabel}</span>
+                        </div>
+                        <span
+                          className={`font-medium ${reward > 0 ? "text-green-600" : reward < 0 ? "text-red-600" : "text-gray-600"}`}
+                        >
+                          {reward > 0 ? `+${reward}` : reward} credits
+                        </span>
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <NextLink href="/dashboard?tab=available-requests">
+              <Button variant="outline" size="sm" className="flex items-center justify-center w-full">
+                <TrendingUp className="mr-1 h-4 w-4" /> Earn More
+              </Button>
+            </NextLink>
+            <NextLink href="/request" className="w-full">
+              <Button
+                variant="default"
+                size="sm"
+                className="flex items-center justify-center w-full bg-[#0E3638] hover:bg-[#0E3638]/90"
+              >
+                <Plus className="mr-1 h-4 w-4" /> Use Credits
+              </Button>
+            </NextLink>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+} 
