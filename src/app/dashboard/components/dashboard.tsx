@@ -124,7 +124,6 @@ export function Dashboard({
       {showOnboarding && (
         <OnboardingFlow
           communities={communities}
-          onComplete={handleOnboardingComplete}
         />
       )}
 
