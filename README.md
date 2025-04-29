@@ -114,6 +114,12 @@ SkillSwap is a peer-to-peer feedback platform designed for job candidates. It al
     ```
     *   The application should now be running at [http://localhost:3000](http://localhost:3000), connected to your Supabase database.
 
+**Important Note on Local User Creation:**
+
+*   The Clerk webhook responsible for syncing new user data to the Supabase database is configured for the **deployed URL** (`https://skillswap-bay.vercel.app/`), not `localhost`.
+*   Therefore, **to create a new user that exists in the database**, you should sign up using the live deployed site: [https://skillswap-bay.vercel.app/](https://skillswap-bay.vercel.app/).
+*   After signing up on the live site, the webhook will trigger, adding the user to the Supabase database. You can then log in with that user on your `localhost` environment.
+
 ### Other Useful Commands
 
 *   **Lint:** `npm run lint` / `npm run lint:fix`
