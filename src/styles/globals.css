@@ -37,6 +37,13 @@
   --brand-subtle-bg: #D5E8E9;
   --brand-dark: #351F0E;
 
+  /* Status/UI Accent Colors */
+  --ui-gray: #e8e9eb;       /* gray: #e8e9eb */
+  --ui-orange: #f4e8dc;     /* orange: #f4e8dc */
+  --status-pending: #fcf8c9; /* yellow: #fcf8c9 */
+  --status-completed: #d8efde; /* green: #d8efde */
+  --status-inprogress: #b7c1d1; /* blue: #b7c1d1 */
+
   --indigo-50: #eef2ff;
 }
 
@@ -127,6 +134,13 @@
   --color-brand-primary: var(--brand-primary);
   --color-brand-subtle-bg: var(--brand-subtle-bg);
   --color-brand-dark: var(--brand-dark);
+
+  /* Add mappings for new status/UI colors */
+  --color-ui-gray: var(--ui-gray);
+  --color-ui-orange: var(--ui-orange);
+  --color-status-pending: var(--status-pending);
+  --color-status-completed: var(--status-completed);
+  --color-status-inprogress: var(--status-inprogress);
 }
 
 @tailwind base;
