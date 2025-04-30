@@ -3,66 +3,69 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "../trpc";
-import { mapPrismaToRequestType, mapPrismaToRequestStatus } from "../../../types"; // Going up one more level
+import {
+  mapPrismaToRequestType,
+  mapPrismaToRequestStatus,
+  type MyRequestItem,
+  type AvailableRequestItem,
+  type RequestDetailsItem, // To be defined in types/index.ts
+} from "../../../types";
+
+// Import Prisma types needed for logic/checks
+import { FeedbackRequestStatus as PrismaStatus } from '@prisma/client';
+import type { UserCommunity, Community } from '@prisma/client';
+
+// Removed intermediate type definitions - they should be defined and imported from ~/types
 
 export const feedbackRouter = createTRPCRouter({
-  getMyRequests: protectedProcedure.query(async ({ ctx }) => {
+  getMyRequests: protectedProcedure.query(async ({ ctx }): Promise<MyRequestItem[]> => {
     const requests = await ctx.db.feedbackRequest.findMany({
       where: {
-        requesterId: ctx.userId,
+        requesterId: ctx.internalUserId, // Use internal CUID
       },
       select: {
         id: true,
         requestType: true,
         status: true,
         createdAt: true,
-        contentText: true, // Include context if needed for display
-        contentUrl: true,  // Include URL if needed
-        _count: { // Count feedback responses for each request
+        contentText: true, 
+        contentUrl: true,  
+        _count: { 
           select: { responses: true },
         },
-        // Add targetCommunities if needed for display
-        // targetCommunities: { select: { community: { select: { id: true, name: true } } } }
       },
       orderBy: {
-        createdAt: "desc", // Show newest requests first
+        createdAt: "desc",
       },
     });
 
-    // Map Prisma enums to frontend types and include feedback count
     return requests.map(req => ({
-      ...req,
+      id: req.id,
       type: mapPrismaToRequestType(req.requestType),
       status: mapPrismaToRequestStatus(req.status),
+      createdAt: req.createdAt,
       feedbackCount: req._count.responses,
-      context: req.contentText ?? req.contentUrl ?? undefined, // Combine text/url for simpler display
+      context: req.contentText ?? req.contentUrl ?? undefined,
     }));
   }),
 
-  getAvailableRequests: protectedProcedure.query(async ({ ctx }) => {
-    // Now receives ctx.internalUserId (non-null CUID) from the middleware
-    console.log(`[getAvailableRequests] Fetching for internal user ID: ${ctx.internalUserId}`);
-
-    // 1. Get IDs of communities the internal user is a member of
+  getAvailableRequests: protectedProcedure.query(async ({ ctx }): Promise<AvailableRequestItem[]> => {
     const userCommunities = await ctx.db.userCommunity.findMany({
-      where: { userId: ctx.internalUserId }, // Use internalUserId directly
+      where: { userId: ctx.internalUserId }, 
       select: { communityId: true },
     });
-    const communityIds = userCommunities.map(uc => uc.communityId);
-    console.log(`[getAvailableRequests] Internal user belongs to community IDs: ${JSON.stringify(communityIds)}`);
+    const communityIds = userCommunities.map((uc: Pick<UserCommunity, 'communityId'>) => uc.communityId);
 
     if (communityIds.length === 0) {
-      console.log("[getAvailableRequests] Internal user not in any communities, returning empty list.");
       return [];
     }
 
-    // 2. Find requests targeted at those communities, excluding user's own requests
     const availableRequests = await ctx.db.feedbackRequest.findMany({
       where: {
         requesterId: {
-          not: ctx.internalUserId, // Use internalUserId directly
+          not: ctx.internalUserId,
         },
-        status: 'PENDING',
+        status: PrismaStatus.PENDING,
         targetCommunities: {
           some: {
             communityId: {
@@ -78,40 +81,58 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true,
         contentUrl: true,
-        requester: { select: { id: true, firstName: true, lastName: true } },
+        requester: { select: { id: true, firstName: true, lastName: true } }, // Select internal CUID
         targetCommunities: { select: { community: { select: { id: true, name: true } } } },
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: "asc", 
       },
     });
-    console.log(`[getAvailableRequests] Found ${availableRequests.length} raw requests: ${JSON.stringify(availableRequests, null, 2)}`); // Keep log for now
 
-    // 3. Map Prisma enums to frontend types
     const mappedRequests = availableRequests.map(req => {
-        const relevantCommunity = req.targetCommunities.find(tc => communityIds.includes(tc.community.id));
+        // Define type for tc explicitly
+        type TargetCommunity = { community: Pick<Community, 'id' | 'name'> };
+        const relevantCommunity = req.targetCommunities.find((tc: TargetCommunity) => communityIds.includes(tc.community.id));
         return {
-          ...req,
+          id: req.id,
           type: mapPrismaToRequestType(req.requestType),
           status: mapPrismaToRequestStatus(req.status),
+          createdAt: req.createdAt,
+          requester: {
+            id: req.requester.id, // This is the internal CUID
+            firstName: req.requester.firstName,
+            lastName: req.requester.lastName,
+          },
           communityId: relevantCommunity?.community.id ?? 'unknown',
           communityName: relevantCommunity?.community.name ?? 'Unknown Community',
           context: req.contentText ?? req.contentUrl ?? undefined,
-          targetCommunities: undefined,
         }
     });
-    console.log(`[getAvailableRequests] Returning ${mappedRequests.length} mapped requests.`); // Keep log for now
     return mappedRequests;
   }),
 
   getRequestById: protectedProcedure
     .input(z.object({ requestId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<RequestDetailsItem> => {
+      // TODO: Add authorization check: ensure the user is part of at least one target community
+      // Fetch user communities
+      const userMemberCommunities = await ctx.db.userCommunity.findMany({
+        where: { userId: ctx.internalUserId },
+        select: { communityId: true }
+      });
+      const userMemberCommunityIds = userMemberCommunities.map((c: Pick<UserCommunity, 'communityId'>) => c.communityId);
+
       const request = await ctx.db.feedbackRequest.findUnique({
         where: {
           id: input.requestId,
-          // Optional: Add check to ensure user has access (e.g., is in one of the target communities)
-          // This might be important if the URL is guessable.
+          // Ensure the request targets a community the user is in
+          targetCommunities: {
+            some: {
+              communityId: {
+                in: userMemberCommunityIds
+              }
+            }
+          }
         },
         select: {
           id: true,
@@ -134,18 +155,30 @@ export const feedbackRouter = createTRPCRouter({
       });
 
       if (!request) {
-        throw new Error("Request not found"); // Or handle appropriately
+        // Check if request exists at all, but user doesn't have access
+        const requestExists = await ctx.db.feedbackRequest.findUnique({
+          where: { id: input.requestId },
+          select: { id: true }
+        });
+        if (requestExists) {
+           throw new Error("Unauthorized: You are not part of the target community for this request.");
+        } else {
+           throw new Error("Request not found.");
+        }
       }
 
-      // Optional: Add authorization check here if needed
-
       return {
-        ...request,
+        id: request.id,
         type: mapPrismaToRequestType(request.requestType),
         status: mapPrismaToRequestStatus(request.status),
-        // Simplify target communities for easier frontend use if needed
-        communities: request.targetCommunities.map(tc => tc.community),
-        targetCommunities: undefined, // Remove original structure
+        createdAt: request.createdAt,
+        requester: {
+            id: request.requester.id, // Internal CUID
+            firstName: request.requester.firstName,
+            lastName: request.requester.lastName,
+            imageUrl: request.requester.imageUrl,
+        },
+        communities: request.targetCommunities.map((tc: { community: Pick<Community, 'id' | 'name'> }) => tc.community),
         context: request.contentText ?? request.contentUrl ?? undefined,
       };
   }),
@@ -153,13 +186,13 @@ export const feedbackRouter = createTRPCRouter({
   submitResponse: protectedProcedure
     .input(z.object({
       requestId: z.string(),
-      feedbackText: z.string().min(10, "Feedback must be at least 10 characters long."), // Add validation
+      feedbackText: z.string().min(10, "Feedback must be at least 10 characters long."),
     }))
     .mutation(async ({ ctx, input }) => {
       // 1. Verify the request exists and is PENDING
       const request = await ctx.db.feedbackRequest.findUnique({
         where: { id: input.requestId },
-        select: { status: true, requesterId: true },
+        select: { status: true, requesterId: true, requestType: true, targetCommunities: { select: { communityId: true } } },
       });
 
       if (!request) {
@@ -168,14 +201,21 @@ export const feedbackRouter = createTRPCRouter({
       if (request.requesterId === ctx.internalUserId) {
         throw new Error("You cannot give feedback on your own request.");
       }
-      // TODO: Decide if 'IN_PROGRESS' is a valid status to submit feedback to, or only 'PENDING'
-      if (request.status !== 'PENDING') {
+      if (request.status !== PrismaStatus.PENDING) { // Use Prisma enum for check
         throw new Error("This request is no longer accepting feedback.");
       }
 
-      // 2. TODO: Verify user is allowed to give feedback (e.g., part of target community)
-      // This requires fetching user's communities and checking against request's target communities.
-      // Skipping for now for brevity, but IMPORTANT for security/logic.
+      // 2. Verify user is allowed to give feedback (part of target community)
+      const userMemberCommunities = await ctx.db.userCommunity.findMany({
+        where: { userId: ctx.internalUserId },
+        select: { communityId: true }
+      });
+      const userMemberCommunityIds = userMemberCommunities.map((c: Pick<UserCommunity, 'communityId'>) => c.communityId);
+      const requestTargetCommunityIds = request.targetCommunities.map((c: { communityId: string }) => c.communityId);
+      const isAllowed = requestTargetCommunityIds.some((id: string) => userMemberCommunityIds.includes(id));
+      if (!isAllowed) {
+        throw new Error("Unauthorized: You are not a member of any community this request was sent to.");
+      }
 
       // 3. Create the feedback response
       const newResponse = await ctx.db.feedbackResponse.create({
@@ -187,33 +227,22 @@ export const feedbackRouter = createTRPCRouter({
         select: { id: true },
       });
 
-      // 4. Update request status to IN_PROGRESS if it was PENDING
-      if (request.status === 'PENDING') {
-          try {
-            await ctx.db.feedbackRequest.update({
-              where: { id: input.requestId },
-              data: { status: 'IN_PROGRESS' },
-            });
-            console.log(`[submitResponse] Updated request ${input.requestId} status to IN_PROGRESS.`);
-          } catch (updateError) {
-            // Log the error but don't fail the whole operation just because status update failed
-            console.error(`[submitResponse] Failed to update status for request ${input.requestId}:`, updateError);
-          }
+      // 4. Update request status to IN_PROGRESS
+      try {
+        await ctx.db.feedbackRequest.update({
+          where: { id: input.requestId },
+          data: { status: PrismaStatus.IN_PROGRESS }, // Use Prisma enum
+        });
+      } catch (updateError) {
+        console.error(`[submitResponse] Failed to update status for request ${input.requestId}:`, updateError);
       }
 
       // 5. TODO: Award credits to the feedback provider (responder)
-      // This logic needs to be carefully implemented based on F-Credit-03
-      // const creditAmount = getCreditAmountForRequestType(request.requestType); // Helper needed
-      // await ctx.db.user.update({
-      //   where: { id: ctx.userId },
-      //   data: { credits: { increment: creditAmount } },
-      // });
-
-      console.log(`Feedback ${newResponse.id} submitted for request ${input.requestId} by internal user ${ctx.internalUserId}`);
+      // Implement logic based on F-Credit-03 & F-Credit-04
+      // Needs: 
+      // - Credit reward mapping from `request.requestType` (use FEEDBACK_REWARDS from types)
+      // - `ctx.db.user.update` to increment responder's credits
 
       return { success: true, responseId: newResponse.id };
     }),
-
-  // Add procedures here
-  // Example: get my requests, get available requests, create request, submit feedback, evaluate feedback
 }); 

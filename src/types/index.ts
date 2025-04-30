@@ -200,4 +200,31 @@ export type DashboardCommunity = {
   name: string;
   description: string | null;
   memberCount: number; // Added computed memberCount field
+};
+
+// --- Component-Specific Data Shapes ---
+
+// Type for data returned by feedback.getMyRequests
+// (Matches MyRequestItem in types/index.ts)
+
+// Type for data returned by feedback.getAvailableRequests
+// (Matches AvailableRequestItem in types/index.ts)
+
+// Type for data returned by feedback.getRequestById
+export type RequestDetailsItem = {
+  id: string;
+  type: RequestType;
+  status: RequestStatus;
+  createdAt: Date;
+  requester: {
+    id: string; // Internal CUID
+    firstName: string | null;
+    lastName: string | null;
+    imageUrl: string | null;
+  };
+  communities: { id: string; name: string }[]; // Simplified community info
+  context?: string;
+  // Explicitly include contentUrl and contentText if needed by the component
+  contentUrl?: string | null;
+  contentText?: string | null;
 }; 

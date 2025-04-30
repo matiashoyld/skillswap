@@ -4,22 +4,22 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '~/trpc/react';
-import type { RouterOutputs } from '~/trpc/react';
+import type { RequestDetailsItem, RequestType } from '~/types';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
 import { Textarea } from '~/components/ui/textarea';
 import { Label } from '~/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { toast } from "sonner"; // Import sonner
+import { toast } from "sonner";
 import { FileText, Link as LinkIcon, Mail, Briefcase, FileCheck, ChevronLeft, UserCircle, AlertCircle, Loader2 } from 'lucide-react';
-import type { RequestType } from '~/types';
+import { RequestContentDisplay } from './RequestContentDisplay';
 
-// Extract the specific request type from RouterOutputs
-type FeedbackRequestDetails = NonNullable<RouterOutputs['feedback']['getRequestById']>;
+// Use RequestDetailsItem defined in types/index.ts
+// type FeedbackRequestDetails = NonNullable<RouterOutputs['feedback']['getRequestById']>;
 
 interface GiveFeedbackFormProps {
-  request: FeedbackRequestDetails;
+  request: RequestDetailsItem;
 }
 
 // Helper function to map RequestType to icon
@@ -47,56 +47,57 @@ const getRequestTypeLabel = (type: RequestType) => {
 };
 
 // Component to render the request content based on type
-const RequestContentDisplay: React.FC<{ request: FeedbackRequestDetails }> = ({ request }) => {
-    // Use request.contentUrl and request.contentText directly
-    const url = request.contentUrl;
-    const text = request.contentText;
+// const RequestContentDisplay: React.FC<{ request: RequestDetailsItem }> = ({ request }) => {
+//     // Use request.contentUrl and request.contentText directly
+//     const url = request.contentUrl;
+//     const text = request.contentText;
 
-    switch (request.type) {
-      case 'linkedin':
-      case 'portfolio':
-        return (
-          <div className="bg-gray-50 p-3 rounded-md break-words">
-            {url ? (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-primary hover:underline"
-              >
-                {url}
-              </a>
-            ) : (
-              <span className="text-gray-500 italic">No URL provided</span>
-            )}
-          </div>
-        );
-      case 'email':
-      case 'coverletter': // Assuming cover letter might also be text
-          return (
-            <div className="bg-gray-50 p-3 rounded-md whitespace-pre-wrap text-sm text-gray-700">
-              {text ?? <span className="text-gray-500 italic">No text provided</span>}
-            </div>
-          );
-      case 'resume': // Assuming resume uses contentUrl for a file link
-         return (
-           <div className="bg-gray-50 p-3 rounded-md text-center">
-             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-             {url ? (
-                 <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-2">
-                    <Button variant="outline" size="sm">View Resume</Button>
-                 </a>
-             ) : (
-                 <p className="text-sm text-gray-600 italic">No resume file link provided.</p>
-             )}
-             {/* Optionally display contextText if relevant for resumes */}
-             {text && <p className="text-sm text-gray-500 mt-2">Context: {text}</p>}
-           </div>
-         );
-      default:
-        return <p className="text-gray-500 italic">Cannot display content for this request type.</p>;
-    }
-  };
+//     switch (request.type) {
+//       case 'linkedin':
+//       case 'portfolio':
+//         return (
+//           <div className="bg-gray-50 p-3 rounded-md break-words">
+//             {url ? (
+//               <a
+//                 href={url}
+//                 target="_blank"
+//                 rel="noopener noreferrer"
+//                 className="text-brand-primary hover:underline"
+//               >
+//                 {url}
+//               </a>
+//             ) : (
+//               <span className="text-gray-500 italic">No URL provided</span>
+//             )}
+//           </div>
+//         );
+//       case 'email':
+//       case 'coverletter': // Assuming cover letter might also be text
+//           return (
+//             <div className="bg-gray-50 p-3 rounded-md whitespace-pre-wrap text-sm text-gray-700">
+//               {text ?? <span className="text-gray-500 italic">No text provided</span>}
+//             </div>
+//           );
+//       case 'resume': // Assuming resume uses contentUrl for a file link
+//          return (
+//            <div className="bg-gray-50 p-3 rounded-md text-center">
+//              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+//              {url ? (
+//                  <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+//                     <Button variant="outline" size="sm">View Resume</Button>
+//                  </a>
+//              ) : (
+//                  <p className="text-sm text-gray-600 italic">No resume file link provided.</p>
+//              )}
+//              {/* Optionally display contextText if relevant for resumes */}
+//              {/* Handled in the main component now */}
+//              {/* {text && <p className="text-sm text-gray-500 mt-2">Context: {text}</p>} */}
+//            </div>
+//          );
+//       default:
+//         return <p className="text-gray-500 italic">Cannot display content for this request type.</p>;
+//     }
+//   };
 
 export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) => {
   const router = useRouter();
@@ -113,6 +114,8 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
       router.push('/dashboard?tab=give-feedback'); 
 
       // Commenting out invalidate as it causes hook errors during navigation
+      // The available requests list should ideally be refetched or updated via cache manipulation
+      // after navigation, perhaps in the dashboard component itself.
       // api.useUtils().feedback.getAvailableRequests.invalidate();
     },
     onError: (error) => {
@@ -155,7 +158,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
               </span>
               <CardTitle>{getRequestTypeLabel(request.type)} Request</CardTitle>
             </div>
-            {/* Optional: Display time ago */}
+            {/* Optional: Display time ago - consider a utility function */}
             {/* <span className="text-sm text-gray-500">{formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}</span> */}
           </div>
           {/* Requester Info */}
@@ -173,12 +176,12 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
         <CardContent className="space-y-4">
           {request.context && (
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Context provided by requester:</h3>
-              <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">{request.context}</p>
+              <h3 className="mb-1 text-sm font-medium text-gray-700">Context provided by requester:</h3>
+              <p className="rounded-md bg-gray-50 p-3 text-sm text-gray-600">{request.context}</p>
             </div>
           )}
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-1">Content to Review:</h3>
+            <h3 className="mb-1 text-sm font-medium text-gray-700">Content to Review:</h3>
             <RequestContentDisplay request={request} />
           </div>
         </CardContent>
