@@ -56,20 +56,31 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId; // From protectedProcedure context
+      // const userId = ctx.userId; // From protectedProcedure context - No longer directly used for lookup
 
-      // 1. Fetch user to ensure they exist and haven't completed onboarding yet
+      if (!ctx.primaryEmail) {
+        console.error("[ERROR] No primary email found in context during onboarding for authenticated user:", ctx.userId);
+        throw new Error("User primary email not found.");
+      }
+
+      console.log("[DEBUG] Attempting completeOnboarding for email:", ctx.primaryEmail);
+
+      // 1. Fetch user by email to ensure they exist and haven't completed onboarding yet
       const user = await ctx.db.user.findUnique({
-        where: { id: userId }, // Use the internal DB ID from context
+        where: { email: ctx.primaryEmail }, // Use primaryEmail for lookup
         select: { id: true, hasCompletedOnboarding: true, credits: true },
       });
 
       if (!user) {
+        console.error("[ERROR] User not found in DB during onboarding for email:", ctx.primaryEmail);
         throw new Error("User not found.");
       }
 
+      // Use the actual internal DB user ID found via email for subsequent operations
+      const dbUserId = user.id;
+
       if (user.hasCompletedOnboarding) {
-        console.warn(`[WARN] User ${userId} attempted to complete onboarding again.`);
+        console.warn(`[WARN] User ${dbUserId} (email: ${ctx.primaryEmail}) attempted to complete onboarding again.`);
         // Optionally return success or a specific message
         return { success: true, message: "Onboarding already completed." };
       }
@@ -78,7 +89,7 @@ export const userRouter = createTRPCRouter({
       await ctx.db.$transaction(async (tx) => {
         // Update user: set onboarding complete and grant credits
         await tx.user.update({
-          where: { id: userId },
+          where: { id: dbUserId }, // Use the fetched database ID
           data: {
             hasCompletedOnboarding: true,
             credits: user.credits + INITIAL_CREDITS, // Add initial credits
@@ -88,14 +99,14 @@ export const userRouter = createTRPCRouter({
         // Create UserCommunity entries for selected communities
         await tx.userCommunity.createMany({
           data: input.communityIds.map((communityId) => ({
-            userId: userId,
+            userId: dbUserId, // Use the fetched database ID
             communityId: communityId,
           })),
           skipDuplicates: true, // Avoid errors if somehow a duplicate is attempted
         });
       });
 
-      console.log(`[INFO] User ${userId} completed onboarding and joined ${input.communityIds.length} communities.`);
+      console.log(`[INFO] User ${dbUserId} (email: ${ctx.primaryEmail}) completed onboarding and joined ${input.communityIds.length} communities.`);
       return { success: true };
     }),
 
