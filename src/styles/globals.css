@@ -129,6 +129,9 @@
   --color-brand-dark: var(--brand-dark);
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   * {
@@ -136,5 +139,10 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Add cursor-pointer to buttons and links */
+  button,
+  a {
+    @apply cursor-pointer;
   }
 }
