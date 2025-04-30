@@ -23,10 +23,9 @@ export default async function DashboardPage() {
   }
 
   // 4. If onboarded, fetch the rest of the dashboard data
-  const [communities, myRequests, availableRequests] = await Promise.all([
+  const [communities, myRequests] = await Promise.all([
     caller.community.list(), // This might be fetched again, could optimize if needed
     caller.feedback.getMyRequests(),
-    caller.feedback.getAvailableRequests(),
   ]);
 
   // 5. Render the main Dashboard component
@@ -35,7 +34,6 @@ export default async function DashboardPage() {
       initialCurrentUser={currentUser} // Already fetched
       initialCommunities={communities}
       initialMyRequests={myRequests}
-      initialAvailableRequests={availableRequests}
     />
   );
 } 

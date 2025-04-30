@@ -4,14 +4,16 @@ import { GiveFeedbackForm } from "~/app/dashboard/give-feedback/[requestId]/comp
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-interface GiveFeedbackPageProps {
-  params: {
-    requestId: string;
-  };
-}
+// interface GiveFeedbackPageProps {
+//   params: {
+//     requestId: string;
+//   };
+// }
 
-export default async function GiveFeedbackPage({ params }: GiveFeedbackPageProps) {
-  const { requestId } = params;
+// Let Next.js infer the props type
+// In Next.js 15, params are a Promise for async Server Components in dynamic routes
+export default async function GiveFeedbackPage({ params }: { params: Promise<{ requestId: string }> }) {
+  const { requestId } = await params; // Await the params Promise
 
   // Create context and caller for server-side tRPC
   const context = await createTRPCContext();

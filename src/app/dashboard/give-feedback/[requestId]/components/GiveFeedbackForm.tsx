@@ -75,7 +75,7 @@ const RequestContentDisplay: React.FC<{ request: FeedbackRequestDetails }> = ({ 
       case 'coverletter': // Assuming cover letter might also be text
           return (
             <div className="bg-gray-50 p-3 rounded-md whitespace-pre-wrap text-sm text-gray-700">
-              {text || <span className="text-gray-500 italic">No text provided</span>}
+              {text ?? <span className="text-gray-500 italic">No text provided</span>}
             </div>
           );
       case 'resume': // Assuming resume uses contentUrl for a file link
@@ -103,7 +103,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
   const [feedbackText, setFeedbackText] = useState('');
 
   const submitFeedbackMutation = api.feedback.submitResponse.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast.success("Feedback Submitted!", {
          description: "Thank you for contributing to the community.",
       });

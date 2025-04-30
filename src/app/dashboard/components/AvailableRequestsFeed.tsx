@@ -60,14 +60,15 @@ export const AvailableRequestsFeed: React.FC = () => {
   const { data: requests, isLoading, error } = api.feedback.getAvailableRequests.useQuery();
   const { data: communitiesData } = api.community.list.useQuery();
 
-  const [selectedCommunityId, setSelectedCommunityId] = useState<string | 'all'>('all');
-  const [selectedType, setSelectedType] = useState<string | 'all'>('all');
+  // State for filters - use string type only, as 'all' is included
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
 
   const communities = communitiesData ?? [];
 
   const filteredRequests = useMemo(() => {
     if (!requests) return [];
-    return requests.filter(request => {
+    return requests.filter((request: AvailableRequestItem) => {
       const communityMatch = selectedCommunityId === 'all' || request.communityId === selectedCommunityId;
       const typeMatch = selectedType === 'all' || request.type === selectedType;
       return communityMatch && typeMatch;
@@ -129,7 +130,7 @@ export const AvailableRequestsFeed: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Communities</SelectItem>
-              {communities.map((community) => (
+              {communities.map((community: { id: string; name: string }) => (
                 <SelectItem key={community.id} value={community.id}>
                   {community.name}
                 </SelectItem>
