@@ -192,7 +192,6 @@ export function OnboardingFlow({ communities }: OnboardingFlowProps) {
                 <Button
                   variant="default"
                   onClick={handleComplete}
-                  // Disable button while mutation is in progress
                   disabled={completeOnboardingMutation.isPending}
                   className="flex items-center bg-brand-primary hover:bg-brand-primary/90"
                 >
