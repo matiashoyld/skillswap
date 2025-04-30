@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -39,26 +40,31 @@ export const feedbackRouter = createTRPCRouter({
   }),
 
   getAvailableRequests: protectedProcedure.query(async ({ ctx }) => {
-    // 1. Get IDs of communities the user is a member of
+    // Now receives ctx.internalUserId (non-null CUID) from the middleware
+    console.log(`[getAvailableRequests] Fetching for internal user ID: ${ctx.internalUserId}`);
+
+    // 1. Get IDs of communities the internal user is a member of
     const userCommunities = await ctx.db.userCommunity.findMany({
-      where: { userId: ctx.userId },
+      where: { userId: ctx.internalUserId }, // Use internalUserId directly
       select: { communityId: true },
     });
     const communityIds = userCommunities.map(uc => uc.communityId);
+    console.log(`[getAvailableRequests] Internal user belongs to community IDs: ${JSON.stringify(communityIds)}`);
 
     if (communityIds.length === 0) {
-      return []; // User is not in any communities, so no requests available
+      console.log("[getAvailableRequests] Internal user not in any communities, returning empty list.");
+      return [];
     }
 
     // 2. Find requests targeted at those communities, excluding user's own requests
     const availableRequests = await ctx.db.feedbackRequest.findMany({
       where: {
         requesterId: {
-          not: ctx.userId, // Exclude requests made by the current user
+          not: ctx.internalUserId, // Use internalUserId directly
         },
-        status: 'PENDING', // Only show pending requests (or filter based on status as needed)
+        status: 'PENDING',
         targetCommunities: {
-          some: { // Request must be in at least one of the user's communities
+          some: {
             communityId: {
               in: communityIds,
             },
@@ -72,28 +78,17 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true,
         contentUrl: true,
-        requester: { // Include minimal requester info if needed (e.g., name)
-          select: { id: true, firstName: true, lastName: true },
-        },
-        targetCommunities: { // Include target community info
-          select: {
-            community: {
-              select: { id: true, name: true },
-            },
-          },
-        },
-        // Do NOT include _count: { select: { responses: true } } here unless needed
+        requester: { select: { id: true, firstName: true, lastName: true } },
+        targetCommunities: { select: { community: { select: { id: true, name: true } } } },
       },
       orderBy: {
-        createdAt: "asc", // Show oldest requests first (FIFO as per PRD F-Dash-03)
+        createdAt: "asc",
       },
     });
+    console.log(`[getAvailableRequests] Found ${availableRequests.length} raw requests: ${JSON.stringify(availableRequests, null, 2)}`); // Keep log for now
 
-    // Map Prisma enums to frontend types
-    // Note: A request might be targeted to multiple communities the user is in.
-    // We might need to refine which community is displayed on the card.
-    // For now, we'll just return the first target community found that the user is part of.
-    return availableRequests.map(req => {
+    // 3. Map Prisma enums to frontend types
+    const mappedRequests = availableRequests.map(req => {
         const relevantCommunity = req.targetCommunities.find(tc => communityIds.includes(tc.community.id));
         return {
           ...req,
@@ -102,11 +97,116 @@ export const feedbackRouter = createTRPCRouter({
           communityId: relevantCommunity?.community.id ?? 'unknown',
           communityName: relevantCommunity?.community.name ?? 'Unknown Community',
           context: req.contentText ?? req.contentUrl ?? undefined,
-          // Omit fields not needed for the list view like targetCommunities array
           targetCommunities: undefined,
         }
     });
+    console.log(`[getAvailableRequests] Returning ${mappedRequests.length} mapped requests.`); // Keep log for now
+    return mappedRequests;
   }),
+
+  getRequestById: protectedProcedure
+    .input(z.object({ requestId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.feedbackRequest.findUnique({
+        where: {
+          id: input.requestId,
+          // Optional: Add check to ensure user has access (e.g., is in one of the target communities)
+          // This might be important if the URL is guessable.
+        },
+        select: {
+          id: true,
+          requestType: true,
+          status: true,
+          createdAt: true,
+          contentText: true,
+          contentUrl: true,
+          requester: {
+            select: { id: true, firstName: true, lastName: true, imageUrl: true },
+          },
+          targetCommunities: {
+            select: {
+              community: {
+                select: { id: true, name: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!request) {
+        throw new Error("Request not found"); // Or handle appropriately
+      }
+
+      // Optional: Add authorization check here if needed
+
+      return {
+        ...request,
+        type: mapPrismaToRequestType(request.requestType),
+        status: mapPrismaToRequestStatus(request.status),
+        // Simplify target communities for easier frontend use if needed
+        communities: request.targetCommunities.map(tc => tc.community),
+        targetCommunities: undefined, // Remove original structure
+        context: request.contentText ?? request.contentUrl ?? undefined,
+      };
+  }),
+
+  submitResponse: protectedProcedure
+    .input(z.object({
+      requestId: z.string(),
+      feedbackText: z.string().min(10, "Feedback must be at least 10 characters long."), // Add validation
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // 1. Verify the request exists and is PENDING
+      const request = await ctx.db.feedbackRequest.findUnique({
+        where: { id: input.requestId },
+        select: { status: true, requesterId: true },
+      });
+
+      if (!request) {
+        throw new Error("Request not found.");
+      }
+      if (request.requesterId === ctx.userId) {
+        throw new Error("You cannot give feedback on your own request.");
+      }
+      // TODO: Decide if 'IN_PROGRESS' is a valid status to submit feedback to, or only 'PENDING'
+      if (request.status !== 'PENDING') {
+        throw new Error("This request is no longer accepting feedback.");
+      }
+
+      // 2. TODO: Verify user is allowed to give feedback (e.g., part of target community)
+      // This requires fetching user's communities and checking against request's target communities.
+      // Skipping for now for brevity, but IMPORTANT for security/logic.
+
+      // 3. Create the feedback response
+      const newResponse = await ctx.db.feedbackResponse.create({
+        data: {
+          feedbackText: input.feedbackText,
+          requestId: input.requestId,
+          responderId: ctx.userId, // The user calling this procedure is the responder
+        },
+        select: { id: true } // Select only needed fields
+      });
+
+      // 4. TODO: Update request status if necessary (e.g., to IN_PROGRESS)
+      // await ctx.db.feedbackRequest.update({
+      //   where: { id: input.requestId },
+      //   data: { status: 'IN_PROGRESS' },
+      // });
+
+      // 5. TODO: Award credits to the feedback provider (responder)
+      // This logic needs to be carefully implemented based on F-Credit-03
+      // const creditAmount = getCreditAmountForRequestType(request.requestType); // Helper needed
+      // await ctx.db.user.update({
+      //   where: { id: ctx.userId },
+      //   data: { credits: { increment: creditAmount } },
+      // });
+
+
+      console.log(`Feedback ${newResponse.id} submitted for request ${input.requestId} by user ${ctx.userId}`);
+
+      // Return minimal confirmation or the new response ID
+      return { success: true, responseId: newResponse.id };
+    }),
 
   // Add procedures here
   // Example: get my requests, get available requests, create request, submit feedback, evaluate feedback

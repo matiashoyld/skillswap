@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+// Keep these imports as they might be used elsewhere or in future features
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 // Path updated
@@ -17,6 +18,7 @@ import { Dialog, DialogContent } from "../../../components/ui/dialog"
 // Use correct relative path for Avatar components
 // Try using the ~/ alias for the src directory
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import {
   MessageSquare,
   Plus,
@@ -39,6 +41,7 @@ import type {
   DashboardUser,
   DashboardCommunity,
 } from "../../../types";
+import { AvailableRequestsFeed } from "./AvailableRequestsFeed"
 
 // Define simpler component props for now
 type DashboardProps = {
