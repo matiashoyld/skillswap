@@ -165,7 +165,7 @@ export const feedbackRouter = createTRPCRouter({
       if (!request) {
         throw new Error("Request not found.");
       }
-      if (request.requesterId === ctx.userId) {
+      if (request.requesterId === ctx.internalUserId) {
         throw new Error("You cannot give feedback on your own request.");
       }
       // TODO: Decide if 'IN_PROGRESS' is a valid status to submit feedback to, or only 'PENDING'
@@ -182,16 +182,24 @@ export const feedbackRouter = createTRPCRouter({
         data: {
           feedbackText: input.feedbackText,
           requestId: input.requestId,
-          responderId: ctx.userId, // The user calling this procedure is the responder
+          responderId: ctx.internalUserId, // Use the internal CUID
         },
-        select: { id: true } // Select only needed fields
+        select: { id: true },
       });
 
-      // 4. TODO: Update request status if necessary (e.g., to IN_PROGRESS)
-      // await ctx.db.feedbackRequest.update({
-      //   where: { id: input.requestId },
-      //   data: { status: 'IN_PROGRESS' },
-      // });
+      // 4. Update request status to IN_PROGRESS if it was PENDING
+      if (request.status === 'PENDING') {
+          try {
+            await ctx.db.feedbackRequest.update({
+              where: { id: input.requestId },
+              data: { status: 'IN_PROGRESS' },
+            });
+            console.log(`[submitResponse] Updated request ${input.requestId} status to IN_PROGRESS.`);
+          } catch (updateError) {
+            // Log the error but don't fail the whole operation just because status update failed
+            console.error(`[submitResponse] Failed to update status for request ${input.requestId}:`, updateError);
+          }
+      }
 
       // 5. TODO: Award credits to the feedback provider (responder)
       // This logic needs to be carefully implemented based on F-Credit-03
@@ -201,10 +209,8 @@ export const feedbackRouter = createTRPCRouter({
       //   data: { credits: { increment: creditAmount } },
       // });
 
+      console.log(`Feedback ${newResponse.id} submitted for request ${input.requestId} by internal user ${ctx.internalUserId}`);
 
-      console.log(`Feedback ${newResponse.id} submitted for request ${input.requestId} by user ${ctx.userId}`);
-
-      // Return minimal confirmation or the new response ID
       return { success: true, responseId: newResponse.id };
     }),
 

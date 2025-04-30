@@ -108,9 +108,12 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
          description: "Thank you for contributing to the community.",
       });
       // TODO: Award credits based on F-Credit-03 (likely done on backend, but confirm)
-      // Invalidate relevant queries if needed, e.g., available requests
+      
+      // Navigate away first
+      router.push('/dashboard?tab=give-feedback'); 
+
+      // Commenting out invalidate as it causes hook errors during navigation
       // api.useUtils().feedback.getAvailableRequests.invalidate();
-      router.push('/dashboard?tab=give-feedback'); // Redirect back to the give feedback tab
     },
     onError: (error) => {
       toast.error("Submission Failed", {

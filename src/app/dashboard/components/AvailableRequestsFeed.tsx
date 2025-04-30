@@ -38,13 +38,18 @@ const getRequestTypeLabel = (type: RequestType) => {
   }
 };
 
-// Helper function to map RequestStatus (lowercase string from API) to badge variant
-const getStatusBadgeVariant = (status: RequestStatus): 'default' | 'secondary' | 'outline' | 'destructive' => {
+// Helper function to map RequestStatus (lowercase string from API) to badge classes
+// Returns a string of Tailwind classes
+const getStatusBadgeClasses = (status: RequestStatus): string => {
   switch (status) {
-    case 'pending': return 'default'; // Use lowercase
-    case 'in_progress': return 'secondary'; // Use lowercase
-    case 'completed': return 'outline'; // Use lowercase
-    default: return 'secondary';
+    case 'pending': 
+      return 'bg-status-pending text-brand-dark'; // Yellow background, dark text
+    case 'in_progress': 
+      return 'bg-status-inprogress text-brand-dark'; // Blue background, dark text
+    case 'completed': 
+      return 'bg-status-completed text-brand-dark'; // Green background, dark text
+    default: 
+      return 'bg-ui-gray text-brand-dark'; // Default gray
   }
 };
 
@@ -160,18 +165,25 @@ export const AvailableRequestsFeed: React.FC = () => {
          </Card>
       ) : (
         <div className="space-y-4">
-          {filteredRequests.map((request: AvailableRequestItem) => (
+          {filteredRequests.map((request: AvailableRequestItem) => {
+            // Log the request ID being used to generate the link
+            console.log(`[AvailableRequestsFeed] Generating link for request ID: ${request.id}`); 
+            return (
             <Card key={request.id} className="transition-all duration-200 hover:shadow-md">
-              <CardContent className="p-4">
+              <CardContent className="px-6">
                 <div className="flex flex-col space-y-3">
                   {/* Top Row: Badges and Time */}
                   <div className="flex justify-between items-start">
                     <div className="flex flex-wrap gap-2 items-center">
-                      <Badge variant="default" className="flex items-center space-x-1">
+                      {/* Apply subtle orange background to type badge */}
+                      <Badge variant="outline" className="border-transparent bg-ui-orange text-brand-dark flex items-center space-x-1">
                         {getRequestTypeIcon(request.type)}
                         <span>{getRequestTypeLabel(request.type)}</span>
                       </Badge>
-                      <Badge variant="secondary">{request.communityName}</Badge>
+                      {/* Community badge can remain secondary or use ui-gray */}
+                      <Badge variant="secondary" className="bg-ui-gray text-brand-dark">
+                         {request.communityName}
+                      </Badge>
                     </div>
                     <span className="text-xs text-gray-500 whitespace-nowrap">
                       {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
@@ -189,9 +201,9 @@ export const AvailableRequestsFeed: React.FC = () => {
 
                   {/* Bottom Row: Status and Action Button */}
                   <div className="flex justify-between items-center pt-2">
-                     {/* Use lowercase status for badge text */}
-                     <Badge variant={getStatusBadgeVariant(request.status)}>
-                        {request.status.replace('_', ' ')} {/* Display nicely */}
+                     {/* Apply dynamic status colors */}
+                     <Badge variant="outline" className={`border-transparent ${getStatusBadgeClasses(request.status)}`}>
+                        {request.status.replace('_', ' ')} 
                      </Badge>
 
                     <Button asChild variant="outline" size="sm">
@@ -203,7 +215,7 @@ export const AvailableRequestsFeed: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )})}
         </div>
       )}
     </div>
