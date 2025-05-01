@@ -35,7 +35,7 @@ export function CreditBalance({ currentUser }: CreditBalanceProps) {
   }
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg overflow-hidden">
+    <Card className="transition-all duration-300 hover:shadow-lg overflow-hidden pt-0">
       <CardHeader className="p-0">
         <div className="bg-brand-subtle-bg text-brand-primary p-4">
           <div className="flex justify-between items-center">
@@ -43,7 +43,7 @@ export function CreditBalance({ currentUser }: CreditBalanceProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-6 pb-4">
+      <CardContent className="px-6">
         <div className="flex flex-col space-y-6">
           <div className="flex items-center justify-between">
             <span className="text-gray-600">Available Credits</span>

@@ -38,17 +38,29 @@ import { auth, currentUser } from "@clerk/nextjs/server";
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 const createInnerTRPCContext = async () => {
-  const user = await currentUser(); // Await the user promise here
+  const user = await currentUser();
   const authObj = auth();
-  // Extract primary email address safely
   const primaryEmail = user?.primaryEmailAddress?.emailAddress ?? null;
+
+  let internalUserRecord = null;
+  if (user?.id) {
+    try {
+      internalUserRecord = await db.user.findUnique({
+        where: { clerkUserId: user.id },
+        select: { id: true }, 
+      });
+    } catch (e) {
+        console.error("Error fetching internal user ID during context creation:", e);
+    }
+  }
 
   return {
     db,
     auth: authObj,
-    user, // Full clerk user object (or null)
-    userId: user?.id, // Clerk User ID (or null)
-    primaryEmail: primaryEmail, // User's primary email (or null)
+    user, // Full clerk user object
+    userId: user?.id, // Clerk User ID
+    internalUserId: internalUserRecord?.id ?? null,
+    primaryEmail: primaryEmail,
   };
 };
 
@@ -59,8 +71,6 @@ const createInnerTRPCContext = async () => {
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async () => {
-  // Fetch stuff that depends on the request (like headers if needed)
-  // For now, just create the inner context
   return await createInnerTRPCContext();
 };
 
@@ -144,12 +154,15 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * @see https://trpc.io/docs/server/middlewares
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.userId) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+  if (!ctx.userId || !ctx.internalUserId) {
+    console.error("Auth check failed in middleware:", { clerkId: ctx.userId, internalId: ctx.internalUserId });
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found or database linkage error." });
   }
   return next({
     ctx: {
+      ...ctx,
       userId: ctx.userId,
+      internalUserId: ctx.internalUserId,
     },
   });
 });
