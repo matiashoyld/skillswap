@@ -29,7 +29,6 @@ export default function CommunitiesPage() {
 
   useEffect(() => {
     if (data) {
-      console.log("User Communities:", data.userCommunities.map(c => c.communityId));
       console.log("Joined Communities:", data.joinedCommunities.map(c => c.id));
       console.log("Available Communities:", data.availableCommunities.map(c => c.id));
       console.log("All Communities Data:", data);

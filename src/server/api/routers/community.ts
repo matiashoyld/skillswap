@@ -55,10 +55,6 @@ export const communityRouter = createTRPCRouter({
     });
     console.log("Raw userCommunities query result:", userCommunities);
 
-    // Let's also check the UserCommunity table directly
-    const allUserCommunities = await ctx.db.userCommunity.findMany();
-    console.log("All UserCommunity entries:", allUserCommunities);
-
     const joinedCommunityIds = new Set(userCommunities.map(uc => uc.communityId));
     console.log("Joined community IDs:", Array.from(joinedCommunityIds));
 
@@ -67,11 +63,88 @@ export const communityRouter = createTRPCRouter({
     const availableCommunities = allCommunities.filter(c => !joinedCommunityIds.has(c.id));
 
     return {
-      userCommunities,
       joinedCommunities,
       availableCommunities,
     };
   }),
+
+  getCommunityDetails: protectedProcedure
+    .input(z.object({ communityId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // Get community details
+      const community = await ctx.db.community.findUnique({
+        where: { id: input.communityId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      });
+
+      if (!community) {
+        throw new Error("Community not found");
+      }
+
+      // Get all members of this community
+      const communityMembers = await ctx.db.userCommunity.findMany({
+        where: { communityId: input.communityId },
+        select: {
+          userId: true,
+          joinedAt: true,
+        },
+      });
+
+      // Get detailed user information for each member
+      const memberDetails = await Promise.all(
+        communityMembers.map(async (member) => {
+          // Get user details
+          const user = await ctx.db.user.findUnique({
+            where: { id: member.userId },
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              imageUrl: true,
+            },
+          });
+
+          if (!user) return null;
+
+          // Get feedback count
+          const feedbackCount = await ctx.db.feedbackResponse.count({
+            where: { responderId: member.userId },
+          });
+
+          // Get user's communities
+          const userCommunities = await ctx.db.userCommunity.findMany({
+            where: { userId: member.userId },
+            select: {
+              community: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          });
+
+          return {
+            ...user,
+            feedbackGiven: feedbackCount,
+            memberSince: member.joinedAt,
+            communities: userCommunities.map((uc) => uc.community.name),
+          };
+        }),
+      );
+
+      // Filter out any null values from memberDetails
+      const validMembers = memberDetails.filter((member): member is NonNullable<typeof member> => member !== null);
+
+      return {
+        ...community,
+        members: validMembers,
+      };
+    }),
 
   joinCommunity: protectedProcedure
     .input(z.object({ communityId: z.string() }))

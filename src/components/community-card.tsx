@@ -1,6 +1,7 @@
 import { Button } from "~/components/ui/button";
 import { Users, UserPlus, UserMinus } from "lucide-react";
 import { type Community } from "@prisma/client";
+import Link from "next/link";
 
 interface CommunityCardProps {
   community: Community & {
@@ -18,7 +19,12 @@ export function CommunityCard({ community, isJoined, onJoin, onLeave }: Communit
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-xl font-semibold mb-2">{community.name}</h3>
+          <Link 
+            href={`/communities/${community.id}`}
+            className="inline-block text-xl font-semibold mb-2 text-gray-900 hover:text-gray-700"
+          >
+            {community.name}
+          </Link>
           <p className="text-gray-600 mb-4">{community.description}</p>
           <div className="flex items-center text-gray-500">
             <Users className="h-4 w-4 mr-2" />
