@@ -1,0 +1,29 @@
+import { notFound } from "next/navigation";
+import { ResumeFeedbackForm } from "../resume/ResumeFeedbackForm";
+import { LinkedinFeedbackForm } from "../linkedin/LinkedinFeedbackForm";
+import { PortfolioFeedbackForm } from "../portfolio/PortfolioFeedbackForm";
+import { CoverLetterFeedbackForm } from "../coverletter/CoverLetterFeedbackForm";
+import { EmailFeedbackForm } from "../email/EmailFeedbackForm";
+
+interface PageProps {
+  params: {
+    type: string;
+  };
+}
+
+export default function TypeSpecificFeedbackPage({ params }: PageProps) {
+  switch (params.type) {
+    case "resume":
+      return <ResumeFeedbackForm />;
+    case "linkedin":
+      return <LinkedinFeedbackForm />;
+    case "portfolio":
+      return <PortfolioFeedbackForm />;
+    case "coverletter":
+      return <CoverLetterFeedbackForm />;
+    case "email":
+      return <EmailFeedbackForm />;
+    default:
+      notFound();
+  }
+} 

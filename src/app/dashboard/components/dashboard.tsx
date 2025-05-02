@@ -186,7 +186,7 @@ export function Dashboard({
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Your Feedback Requests</h2>
-                      <Link href="/request">
+                      <Link href="/dashboard/request-feedback">
                         <Button variant="default" className="flex items-center bg-[#0E3638] hover:bg-[#0E3638]/90">
                           <Plus className="h-4 w-4 mr-2" />
                           Request Feedback
@@ -203,7 +203,7 @@ export function Dashboard({
                             Get started by creating your first feedback request
                           </p>
                           <div className="mt-6">
-                            <Link href="/request">
+                            <Link href="/dashboard/request-feedback">
                               <Button variant="default" className="bg-[#0E3638] hover:bg-[#0E3638]/90">
                                 Request Feedback
                               </Button>
