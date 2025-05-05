@@ -24,7 +24,13 @@ export const CoverLetterFeedbackForm: React.FC = () => {
       return;
     }
     setError(null);
-    // TODO: handle submit
+    const params = new URLSearchParams({
+      type: "coverletter",
+      contentUrl: coverLetterUrl,
+      contentText: coverLetterText,
+      context,
+    });
+    router.push(`/dashboard/request-feedback/select-communities?${params.toString()}`);
   };
 
   return (
@@ -65,7 +71,7 @@ export const CoverLetterFeedbackForm: React.FC = () => {
               </Alert>
             )}
             <div className="flex justify-end">
-              <Button type="submit" className="bg-brand-primary hover:bg-brand-primary/90">Submit</Button>
+              <Button type="submit" className="bg-brand-primary hover:bg-brand-primary/90">Next: Select Communities</Button>
             </div>
           </form>
         </CardContent>

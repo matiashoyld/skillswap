@@ -181,6 +181,8 @@ export const feedbackRouter = createTRPCRouter({
             lastName: request.requester.lastName,
             imageUrl: request.requester.imageUrl,
         },
+        contentUrl: request.contentUrl,
+        contentText: request.contentText,
         communities: request.targetCommunities.map((tc: { community: Pick<Community, 'id' | 'name'> }) => tc.community),
         context: request.contentText ?? request.contentUrl ?? undefined,
       };

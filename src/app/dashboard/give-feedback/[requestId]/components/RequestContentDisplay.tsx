@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { RequestDetailsItem, RequestType } from '~/types'; // Assuming RequestDetailsItem includes type, contentUrl, contentText
 import { Button } from '~/components/ui/button';
 import { FileText } from 'lucide-react';
@@ -22,8 +22,15 @@ interface RequestContentDisplayProps {
 }
 
 export const RequestContentDisplay: React.FC<RequestContentDisplayProps> = ({ request }) => {
-  const url = request.contentUrl;
-  const text = request.contentText;
+  const [url, setUrl] = useState(request.contentUrl);
+  const [text, setText] = useState(request.contentText);
+
+  useEffect(() => {
+    setUrl(request.contentUrl);
+    setText(request.contentText);
+
+    console.log(request)
+  }, [request]);
 
   switch (request.type) {
     case 'linkedin':

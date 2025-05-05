@@ -21,6 +21,10 @@ export default function SelectCommunitiesPage() {
 
   const [selected, setSelected] = useState<string[]>([]);
 
+  const submitRequestMutation = api.feedback.createRequest.useMutation({
+    onSuccess: () => router.push("/dashboard?tab=my-requests"),
+  });
+
   const handleToggle = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
@@ -30,14 +34,13 @@ export default function SelectCommunitiesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Call backend to create the feedback request
-    await api.feedback.createRequest.mutateAsync({
-      requestType,
+    submitRequestMutation.mutate({
+      requestType: requestType as "linkedin" | "email" | "resume" | "portfolio" | "coverletter",
       contentUrl: contentUrl || undefined,
       contentText: contentText || undefined,
       context,
       communityIds: selected,
     });
-    router.push("/dashboard?tab=my-requests");
   };
 
   if (isLoading) return <div>Loading...</div>;

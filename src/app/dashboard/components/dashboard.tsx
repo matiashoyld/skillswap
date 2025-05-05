@@ -252,11 +252,9 @@ export function Dashboard({
                                   <MessageSquare className="h-4 w-4 mr-1" />
                                   {feedbackCount} {feedbackCount === 1 ? "feedback" : "feedbacks"}
                                 </div>
-                                <Link href={`/request/${request.id}`}>
-                                  <Button variant="outline" size="sm">
-                                    View Details
-                                  </Button>
-                                </Link>
+                                <Button asChild variant="outline" size="sm">
+                                  <Link href={`/dashboard/my-requests/${request.id}`}>View Details</Link>
+                                </Button>
                               </div>
                             </CardContent>
                           </Card>
