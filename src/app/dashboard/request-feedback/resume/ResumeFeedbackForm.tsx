@@ -51,7 +51,7 @@ export const ResumeFeedbackForm: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="resumeText">Resume Text (if applicable)</Label>
-              <Textarea id="resumeText" value={resumeText} onChange={e => setResumeText(e.target.value)} placeholder="Paste your resume content here..." rows={6} />
+              <Textarea id="resumeText" value={resumeText} onChange={e => setResumeText(e.target.value)} placeholder="Paste your resume content here..." rows={12} className="h-[500px]" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="context">Additional Context</Label>

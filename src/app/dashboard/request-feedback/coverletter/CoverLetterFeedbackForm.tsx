@@ -51,7 +51,7 @@ export const CoverLetterFeedbackForm: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="coverLetterText">Cover Letter Text (if applicable)</Label>
-              <Textarea id="coverLetterText" value={coverLetterText} onChange={e => setCoverLetterText(e.target.value)} placeholder="Paste your cover letter content here..." rows={6} />
+              <Textarea id="coverLetterText" value={coverLetterText} onChange={e => setCoverLetterText(e.target.value)} placeholder="Paste your cover letter content here..." rows={6} className="h-[500px]" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="context">Additional Context</Label>

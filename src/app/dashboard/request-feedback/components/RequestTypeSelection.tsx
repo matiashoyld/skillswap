@@ -69,18 +69,19 @@ export const RequestTypeSelection = () => {
             {requestTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <Button
-                  key={type.id}
-                  asChild
-                  variant="outline"
-                  className="h-auto p-6 flex flex-col items-start justify-start space-y-2 text-left"
-                >
-                  <Link href={type.href}>
-                    <Icon className="h-6 w-6 text-brand-primary" />
-                    <span className="font-semibold">{type.title}</span>
-                    <span className="text-sm text-gray-500">{type.description}</span>
-                  </Link>
-                </Button>
+                <div key={type.id} className="w-full max-w-[380px]">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-auto py-8 px-6 flex flex-col items-start justify-start space-y-2 text-left"
+                  >
+                    <Link href={type.href}>
+                      <Icon className="h-6 w-6 text-brand-primary" />
+                      <span className="font-semibold block mb-1">{type.title}</span>
+                        <p className="text-sm text-gray-500 break-words whitespace-pre-wrap">{type.description}</p>
+                    </Link>
+                  </Button>
+                </div>
               );
             })}
           </div>
