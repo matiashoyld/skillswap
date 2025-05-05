@@ -65,7 +65,7 @@ export const CoverLetterFeedbackForm: React.FC = () => {
               </Alert>
             )}
             <div className="flex justify-end">
-              <Button type="submit" className="bg-brand-primary hover:bg-brand-primary/90">Submit Cover Letter Feedback</Button>
+              <Button type="submit" className="bg-brand-primary hover:bg-brand-primary/90">Submit</Button>
             </div>
           </form>
         </CardContent>
