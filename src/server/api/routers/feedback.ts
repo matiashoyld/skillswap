@@ -33,6 +33,7 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true, 
         contentUrl: true,  
+        context: true,
         _count: { 
           select: { responses: true },
         },
@@ -48,7 +49,7 @@ export const feedbackRouter = createTRPCRouter({
       status: mapPrismaToRequestStatus(req.status),
       createdAt: req.createdAt,
       feedbackCount: req._count.responses,
-      context: req.contentText ?? req.contentUrl ?? undefined,
+      context: req.context,
     }));
   }),
 
@@ -144,6 +145,7 @@ export const feedbackRouter = createTRPCRouter({
           createdAt: true,
           contentText: true,
           contentUrl: true,
+          context: true,
           requester: {
             select: { id: true, firstName: true, lastName: true, imageUrl: true },
           },
@@ -184,7 +186,7 @@ export const feedbackRouter = createTRPCRouter({
         contentUrl: request.contentUrl,
         contentText: request.contentText,
         communities: request.targetCommunities.map((tc: { community: Pick<Community, 'id' | 'name'> }) => tc.community),
-        context: request.contentText ?? request.contentUrl ?? undefined,
+        context: request.context,
       };
   }),
 
@@ -296,7 +298,8 @@ export const feedbackRouter = createTRPCRouter({
         data: {
           requestType: mapRequestTypeToPrisma(input.requestType),
           contentUrl: input.contentUrl,
-          contentText: input.contentText || input.context, // Use context as contentText if no contentText provided
+          contentText: input.contentText,
+          context: input.context,
           status: FeedbackRequestStatus.PENDING,
           requesterId: ctx.internalUserId,
           targetCommunities: {

@@ -4,6 +4,10 @@ import { api } from "~/trpc/react";
 import { CommunityCard } from "~/components/community-card";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { Button } from "~/components/ui/button";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function CommunitiesPage() {
   const utils = api.useUtils();
@@ -38,7 +42,10 @@ export default function CommunitiesPage() {
   if (isLoading) {
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Communities</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-8 w-48" />
+        </div>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-gray-200 h-32 rounded-lg" />
@@ -61,7 +68,15 @@ export default function CommunitiesPage() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Communities</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="ghost" asChild>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <h1 className="text-3xl font-bold">Communities</h1>
+      </div>
       
       {joinedCommunities.length > 0 && (
         <section className="mb-8">
