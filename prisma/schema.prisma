@@ -1,19 +1,110 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL") // Loads from .env file
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-//--------------------------------------
-// Enums
-//--------------------------------------
+model User {
+  id                     String               @id @default(cuid())
+  email                  String               @unique
+  credits                Int                  @default(0)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  clerkUserId            String?              @unique
+  firstName              String?
+  imageUrl               String?
+  lastName               String?
+  hasCompletedOnboarding Boolean              @default(false)
+  evaluationsMade        FeedbackEvaluation[] @relation("EvaluatorEvaluations")
+  requestsMade           FeedbackRequest[]    @relation("RequesterRequests")
+  responsesGiven         FeedbackResponse[]   @relation("ResponderResponses")
+  communities            UserCommunity[]
+
+  @@index([email])
+}
+
+model Community {
+  id          String             @id @default(cuid())
+  name        String             @unique
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  requests    RequestCommunity[]
+  members     UserCommunity[]
+}
+
+model UserCommunity {
+  userId      String
+  communityId String
+  joinedAt    DateTime  @default(now())
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, communityId])
+  @@index([communityId])
+}
+
+model FeedbackRequest {
+  id          String              @id @default(cuid())
+  requestType FeedbackRequestType
+  contentUrl  String?
+  contentText String?
+  context     String?
+  status            FeedbackRequestStatus @default(PENDING)
+  requesterId       String
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  requester         User                  @relation("RequesterRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  responses         FeedbackResponse[]
+  targetCommunities RequestCommunity[]
+
+  @@index([requesterId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model RequestCommunity {
+  requestId   String
+  communityId String
+  community   Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  request     FeedbackRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@id([requestId, communityId])
+  @@index([communityId])
+}
+
+model FeedbackResponse {
+  id           String              @id @default(cuid())
+  feedbackText String
+  requestId    String
+  responderId  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  evaluation   FeedbackEvaluation?
+  request      FeedbackRequest     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  responder    User                @relation("ResponderResponses", fields: [responderId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([responderId])
+}
+
+model FeedbackEvaluation {
+  id          String                   @id @default(cuid())
+  rating      FeedbackEvaluationRating
+  responseId  String                   @unique
+  evaluatorId String
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  evaluator   User                     @relation("EvaluatorEvaluations", fields: [evaluatorId], references: [id], onDelete: Cascade)
+  response    FeedbackResponse         @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([evaluatorId])
+}
 
 enum FeedbackRequestType {
   LINKEDIN
@@ -25,136 +116,14 @@ enum FeedbackRequestType {
 
 enum FeedbackRequestStatus {
   PENDING
-  IN_PROGRESS // When at least one feedback response is submitted? Or assigned? TBD
-  COMPLETED   // When the requester marks it as complete, or after a certain time? TBD
+  IN_PROGRESS
+  COMPLETED
 }
 
 enum FeedbackEvaluationRating {
-  SUPER_INSIGHTFUL // +2 bonus credits
-  HELPFUL          // +1 bonus credit
-  OKAY             // +0 bonus credits
-  NOT_HELPFUL      // -1 credit penalty
-  HARMFUL          // -2 credit penalty
-}
-
-//--------------------------------------
-// Models
-//--------------------------------------
-
-model User {
-  id             String  @id @default(cuid())
-  clerkUserId    String?  @unique // Can be null initially if webhook fails/delays
-  email          String  @unique
-  firstName      String?
-  lastName       String?
-  imageUrl       String?
-  credits        Int     @default(0)
-  hasCompletedOnboarding Boolean @default(false) // Added for onboarding tracking
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  communities       UserCommunity[]
-  requestsMade      FeedbackRequest[]      @relation("RequesterRequests")
-  responsesGiven    FeedbackResponse[]     @relation("ResponderResponses")
-  evaluationsMade   FeedbackEvaluation[]   @relation("EvaluatorEvaluations")
-
-  @@index([email])
-}
-
-model Community {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  members       UserCommunity[] // Members of this community
-  requests      RequestCommunity[] // Feedback requests broadcast to this community
-}
-
-// Join table for Many-to-Many relationship between User and Community
-model UserCommunity {
-  userId      String
-  communityId String
-  joinedAt    DateTime @default(now())
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
-  @@id([userId, communityId])
-  @@index([communityId])
-}
-
-model FeedbackRequest {
-  id           String                @id @default(cuid())
-  requestType  FeedbackRequestType
-  // Content can be a URL (LinkedIn, Portfolio), text (Cold Email), or URL to a stored file (Resume, Cover Letter)
-  contentUrl   String? // URL for LinkedIn, Portfolio, or stored file
-  contentText  String? // Text for Cold Email
-  status       FeedbackRequestStatus @default(PENDING)
-
-  requesterId  String
-  requester    User   @relation("RequesterRequests", fields: [requesterId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  targetCommunities RequestCommunity[]   // Communities this request is broadcast to
-  responses         FeedbackResponse[] // Responses received for this request
-
-  @@index([requesterId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-// Join table for Many-to-Many relationship between FeedbackRequest and Community
-model RequestCommunity {
-  requestId   String
-  communityId String
-
-  request   FeedbackRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  community Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
-  @@id([requestId, communityId])
-  @@index([communityId]) // To easily find requests for a community
-}
-
-
-model FeedbackResponse {
-  id           String   @id @default(cuid())
-  feedbackText String
-
-  requestId    String
-  request      FeedbackRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-
-  responderId  String
-  responder    User @relation("ResponderResponses", fields: [responderId], references: [id], onDelete: Cascade) // User who gave the feedback
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  evaluation   FeedbackEvaluation? // Evaluation received for this feedback
-
-  @@index([requestId])
-  @@index([responderId])
-}
-
-model FeedbackEvaluation {
-  id           String                   @id @default(cuid())
-  rating       FeedbackEvaluationRating
-
-  responseId   String                   @unique // Each response can only have one evaluation
-  response     FeedbackResponse         @relation(fields: [responseId], references: [id], onDelete: Cascade)
-
-  // The user who *received* the feedback and is now evaluating it (original requester)
-  evaluatorId  String
-  evaluator    User                     @relation("EvaluatorEvaluations", fields: [evaluatorId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([responseId])
-  @@index([evaluatorId])
+  SUPER_INSIGHTFUL
+  HELPFUL
+  OKAY
+  NOT_HELPFUL
+  HARMFUL
 }

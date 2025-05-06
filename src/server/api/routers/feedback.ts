@@ -14,6 +14,9 @@ import {
 // Import Prisma types needed for logic/checks
 import { FeedbackRequestStatus as PrismaStatus } from '@prisma/client';
 import type { UserCommunity, Community } from '@prisma/client';
+import { CREDIT_COSTS } from "~/types";
+import { mapRequestTypeToPrisma } from "~/types";
+import { FeedbackRequestStatus } from "@prisma/client";
 
 // Removed intermediate type definitions - they should be defined and imported from ~/types
 
@@ -30,6 +33,7 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true, 
         contentUrl: true,  
+        context: true,
         _count: { 
           select: { responses: true },
         },
@@ -45,7 +49,7 @@ export const feedbackRouter = createTRPCRouter({
       status: mapPrismaToRequestStatus(req.status),
       createdAt: req.createdAt,
       feedbackCount: req._count.responses,
-      context: req.contentText ?? req.contentUrl ?? undefined,
+      context: req.context,
     }));
   }),
 
@@ -141,6 +145,7 @@ export const feedbackRouter = createTRPCRouter({
           createdAt: true,
           contentText: true,
           contentUrl: true,
+          context: true,
           requester: {
             select: { id: true, firstName: true, lastName: true, imageUrl: true },
           },
@@ -178,8 +183,10 @@ export const feedbackRouter = createTRPCRouter({
             lastName: request.requester.lastName,
             imageUrl: request.requester.imageUrl,
         },
+        contentUrl: request.contentUrl,
+        contentText: request.contentText,
         communities: request.targetCommunities.map((tc: { community: Pick<Community, 'id' | 'name'> }) => tc.community),
-        context: request.contentText ?? request.contentUrl ?? undefined,
+        context: request.context,
       };
   }),
 
@@ -244,5 +251,75 @@ export const feedbackRouter = createTRPCRouter({
       // - `ctx.db.user.update` to increment responder's credits
 
       return { success: true, responseId: newResponse.id };
+    }),
+
+  createRequest: protectedProcedure
+    .input(
+      z.object({
+        requestType: z.enum(['resume', 'linkedin', 'portfolio', 'coverletter', 'email'] as const),
+        contentUrl: z.string().url().optional(),
+        contentText: z.string().optional(),
+        context: z.string(),
+        communityIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify user has enough credits
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.internalUserId },
+        select: { credits: true },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const creditCost = CREDIT_COSTS[input.requestType];
+      if (user.credits < creditCost) {
+        throw new Error(`Insufficient credits. You need ${creditCost} credits to request ${input.requestType} feedback.`);
+      }
+
+      // Verify all communities exist and user is a member
+      // const communities = await ctx.db.community.findMany({
+      //   where: {
+      //     id: { in: input.communityIds },
+      //     members: {
+      //       some: { userId: ctx.internalUserId },
+      //     },
+      //   },
+      // });
+
+      // if (communities.length !== input.communityIds.length) {
+      //   throw new Error("One or more communities do not exist or you are not a member");
+      // }
+
+      // Create the feedback request
+      const request = await ctx.db.feedbackRequest.create({
+        data: {
+          requestType: mapRequestTypeToPrisma(input.requestType),
+          contentUrl: input.contentUrl,
+          contentText: input.contentText,
+          context: input.context,
+          status: FeedbackRequestStatus.PENDING,
+          requesterId: ctx.internalUserId,
+          targetCommunities: {
+            create: input.communityIds.map(communityId => ({
+              communityId,
+            })),
+          },
+        },
+      });
+
+      // Deduct credits from user
+      await ctx.db.user.update({
+        where: { id: ctx.internalUserId },
+        data: {
+          credits: {
+            decrement: creditCost,
+          },
+        },
+      });
+
+      return { success: true, requestId: request.id };
     }),
 }); 
