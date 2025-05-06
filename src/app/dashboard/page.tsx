@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   // 3. Check onboarding status
   if (!currentUser.hasCompletedOnboarding) {
     // Fetch communities needed for the onboarding flow
-    const communities = await caller.community.list();
+    const communities = await caller.community.getAllCommunities();
 
     // Render the Onboarding Flow component
     return (
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   // 4. If onboarded, fetch the rest of the dashboard data
   const [communities, myRequests] = await Promise.all([
-    caller.community.list(), // This might be fetched again, could optimize if needed
+    caller.community.getAllCommunities(), // This might be fetched again, could optimize if needed
     caller.feedback.getMyRequests(),
   ]);
 

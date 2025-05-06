@@ -6,6 +6,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from '~/components/ui/sonner';
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { Navbar } from "~/components/navbar";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -25,7 +26,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${geist.variable}`}>
         <body>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <Navbar />
+            {children}
+          </TRPCReactProvider>
           <Toaster />
         </body>
       </html>
