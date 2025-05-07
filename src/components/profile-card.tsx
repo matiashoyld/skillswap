@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import Image from 'next/image';
 
 interface ProfileCardProps {
   imageUrl: string | null;
@@ -27,11 +28,14 @@ export function ProfileCard({
   return (
     <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
       {/* Profile Picture */}
-      <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
-        <img
+      <div className="w-24 h-24 rounded-full overflow-hidden mb-4 relative">
+        <Image
           src={imageUrl ?? "/default-avatar.png"}
           alt={`${fullName}'s profile picture`}
-          className="w-full h-full object-cover"
+          width={96}
+          height={96}
+          className="rounded-full"
+          style={{ objectFit: "cover" }}
         />
       </div>
 

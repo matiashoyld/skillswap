@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 // Keep these imports as they might be used elsewhere or in future features
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams /*, useRouter*/ } from "next/navigation" // Removed useRouter
 import Link from "next/link"
 // Path updated
 import { CreditBalance } from "./credit-balance"
@@ -61,7 +61,7 @@ export function Dashboard({
   const myRequests = initialMyRequests
 
   const searchParams = useSearchParams()
-  const router = useRouter()
+  // const router = useRouter() // Removed unused router
   const showOnboarding = searchParams.get("onboarding") === "true" && communities.length > 0
 
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -74,11 +74,6 @@ export function Dashboard({
     alert(`Invitation sent to ${inviteEmail}`)
     setInviteEmail("")
     setShowInviteModal(false)
-  }
-
-  const handleOnboardingComplete = () => {
-    // TODO: Add tRPC mutation call here to mark onboarding as complete if needed
-    router.push("/dashboard") // Navigate to dashboard (no query param)
   }
 
   const getRequestTypeIcon = (type: RequestType) => {

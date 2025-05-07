@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import type { RequestDetailsItem, RequestType } from "~/types"; // Assuming RequestDetailsItem includes type, contentUrl, contentText
-import { Button } from "~/components/ui/button";
+// import { Button } from "~/components/ui/button"; // Removed unused import
 import { Link2 } from "lucide-react";
 
 // Helper function to map RequestType to label (kept local as it's specific to display)

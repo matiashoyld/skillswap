@@ -12,9 +12,11 @@ interface PageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function TypeSpecificFeedbackPage({ params: paramsPromise, searchParams: searchParamsPromise }: PageProps) {
+export default async function TypeSpecificFeedbackPage({ params: paramsPromise /*, searchParams: searchParamsPromise */ }: PageProps) {
   const params = await paramsPromise;
-  const searchParams = searchParamsPromise ? await searchParamsPromise : undefined;
+  // const searchParams = searchParamsPromise ? await searchParamsPromise : undefined; // Removed unused variable and logic
+
+  // console.log(searchParams); // Example usage if needed
 
   switch (params.type) {
     case "resume":

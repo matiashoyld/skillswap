@@ -6,7 +6,6 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from '~/components/ui/sonner';
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Navbar } from "~/components/navbar";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
