@@ -71,8 +71,7 @@ export async function POST(req: Request) {
 
     if (!primaryEmail) {
       console.error(`Webhook error: Primary email not found for user ${id}`);
-      // Respond with 200 OK even if email is missing to acknowledge receipt, 
-      // but log the error. Clerk might send an update later.
+      // Respond with 200 OK even if email is missing to acknowledge receipt.
       return new Response('Webhook received, primary email missing', { status: 200 });
     }
 

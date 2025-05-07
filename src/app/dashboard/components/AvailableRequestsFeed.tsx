@@ -18,10 +18,10 @@ import { formatDistanceToNow } from 'date-fns';
 const getRequestTypeIcon = (type: RequestType) => {
   switch (type) {
     case 'linkedin': return <LinkIcon className="h-4 w-4" />;
-    case 'email': return <Mail className="h-4 w-4" />; // Use 'email'
+    case 'email': return <Mail className="h-4 w-4" />;
     case 'resume': return <FileText className="h-4 w-4" />;
     case 'portfolio': return <Briefcase className="h-4 w-4" />;
-    case 'coverletter': return <FileCheck className="h-4 w-4" />; // Use 'coverletter'
+    case 'coverletter': return <FileCheck className="h-4 w-4" />;
     default: return null;
   }
 };
@@ -30,10 +30,10 @@ const getRequestTypeIcon = (type: RequestType) => {
 const getRequestTypeLabel = (type: RequestType) => {
   switch (type) {
     case 'linkedin': return 'LinkedIn';
-    case 'email': return 'Cold Email'; // Use 'email'
+    case 'email': return 'Cold Email';
     case 'resume': return 'Resume';
     case 'portfolio': return 'Portfolio';
-    case 'coverletter': return 'Cover Letter'; // Use 'coverletter'
+    case 'coverletter': return 'Cover Letter';
     default: return 'Unknown Type';
   }
 };
@@ -43,13 +43,13 @@ const getRequestTypeLabel = (type: RequestType) => {
 const getStatusBadgeClasses = (status: RequestStatus): string => {
   switch (status) {
     case 'pending': 
-      return 'bg-status-pending text-brand-dark'; // Yellow background, dark text
+      return 'bg-status-pending text-brand-dark';
     case 'in_progress': 
-      return 'bg-status-inprogress text-brand-dark'; // Blue background, dark text
+      return 'bg-status-inprogress text-brand-dark';
     case 'completed': 
-      return 'bg-status-completed text-brand-dark'; // Green background, dark text
+      return 'bg-status-completed text-brand-dark';
     default: 
-      return 'bg-ui-gray text-brand-dark'; // Default gray
+      return 'bg-ui-gray text-brand-dark';
   }
 };
 
@@ -162,10 +162,10 @@ export const AvailableRequestsFeed: React.FC = () => {
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="linkedin">LinkedIn</SelectItem>
-              <SelectItem value="email">Cold Email</SelectItem> {/* Use 'email' */}
+              <SelectItem value="email">Cold Email</SelectItem>
               <SelectItem value="resume">Resume</SelectItem>
               <SelectItem value="portfolio">Portfolio</SelectItem>
-              <SelectItem value="coverletter">Cover Letter</SelectItem> {/* Use 'coverletter' */}
+              <SelectItem value="coverletter">Cover Letter</SelectItem>
             </SelectContent>
           </Select>
         </div>

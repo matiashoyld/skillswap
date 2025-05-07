@@ -17,7 +17,7 @@ export function ProfileCard({
   firstName,
   lastName,
   email,
-  aboutMe = "Hi, I'm a professional looking to give and receive feedback!", // TODO: replace with user's about me when we have that implemented
+  aboutMe = "Hi, I'm a professional looking to give and receive feedback!",
   communities,
   feedbackGiven,
   memberSince,

@@ -173,14 +173,6 @@ export type AvailableRequestItem = {
   context?: string;
 };
 
-// Simplified/specific user type used for the dashboard props
-// We use the base PrismaUser structure from the exported User type
-// export type CurrentDashboardUser = User & {
-//   // credits are already part of PrismaUser
-//   // We can add other dashboard-specific fields if needed
-//   // e.g., onboardingComplete: boolean;
-// }; 
-
 // Specific type for the user object returned by user.getCurrent and used in Dashboard
 export type DashboardUser = {
   id: string;
@@ -205,10 +197,10 @@ export type DashboardCommunity = {
 // --- Component-Specific Data Shapes ---
 
 // Type for data returned by feedback.getMyRequests
-// (Matches MyRequestItem in types/index.ts)
+// // (Matches MyRequestItem in types/index.ts) // Removed redundant comment
 
 // Type for data returned by feedback.getAvailableRequests
-// (Matches AvailableRequestItem in types/index.ts)
+// // (Matches AvailableRequestItem in types/index.ts) // Removed redundant comment
 
 // Type for data returned by feedback.getRequestById
 export type RequestDetailsItem = {
