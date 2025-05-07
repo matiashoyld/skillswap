@@ -57,14 +57,18 @@ const getStatusBadgeClasses = (status: RequestStatus): string => {
 type AvailableRequestItem = RouterOutputs['feedback']['getAvailableRequests'][number];
 
 export const AvailableRequestsFeed: React.FC = () => {
-  const { data: requests, isLoading, error } = api.feedback.getAvailableRequests.useQuery();
-  const { data: communitiesData } = api.community.list.useQuery();
+  const { data: requests, isLoading: requestsLoading, error: requestsError } = api.feedback.getAvailableRequests.useQuery();
+  const { data: communitiesData, isLoading: communitiesLoading, error: communitiesError } = api.community.getAllCommunities.useQuery();
 
   // State for filters - use string type only, as 'all' is included
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
 
-  const communities = communitiesData ?? [];
+  const communities = useMemo(() => {
+    if (!communitiesData) return [];
+    // Assuming joinedCommunities and availableCommunities items have id and name
+    return [...communitiesData.joinedCommunities, ...communitiesData.availableCommunities];
+  }, [communitiesData]);
 
   const filteredRequests = useMemo(() => {
     if (!requests) return [];
@@ -75,7 +79,7 @@ export const AvailableRequestsFeed: React.FC = () => {
     });
   }, [requests, selectedCommunityId, selectedType]);
 
-  if (isLoading) {
+  if (requestsLoading || communitiesLoading) {
     return (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -92,13 +96,25 @@ export const AvailableRequestsFeed: React.FC = () => {
       );
   }
 
-  if (error) {
+  if (requestsError) {
     return (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>Error Loading Requests</AlertTitle>
           <AlertDescription>
-            Failed to load available requests: {error.message}
+            Failed to load available requests: {requestsError.message}
+          </AlertDescription>
+        </Alert>
+      );
+  }
+
+  if (communitiesError) {
+    return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Communities</AlertTitle>
+          <AlertDescription>
+            Failed to load communities: {communitiesError.message}
           </AlertDescription>
         </Alert>
       );
@@ -130,7 +146,7 @@ export const AvailableRequestsFeed: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Communities</SelectItem>
-              {communities.map((community: { id: string; name: string }) => (
+              {communities.map((community) => (
                 <SelectItem key={community.id} value={community.id}>
                   {community.name}
                 </SelectItem>

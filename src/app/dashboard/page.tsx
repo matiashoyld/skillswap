@@ -5,6 +5,7 @@ import { OnboardingFlow } from "./components/onboarding-flow"; // Import the act
 import { Navbar } from "~/components/navbar";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import type { DashboardCommunity } from "~/types"; // Import DashboardCommunity type
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -22,17 +23,38 @@ export default async function DashboardPage() {
   // 3. Check onboarding status
   if (!dbUser.hasCompletedOnboarding) {
     // Fetch communities needed for the onboarding flow
-    const communities = await caller.community.getAllCommunities();
+    const allCommunitiesData = await caller.community.getAllCommunities();
+    const communitiesForOnboarding: DashboardCommunity[] = allCommunitiesData.availableCommunities.map(c => ({
+      id: c.id,
+      name: c.name,
+      description: c.description, // Assuming DashboardCommunity.description can be string | null
+      memberCount: c._count.members,
+    }));
 
     // Render the Onboarding Flow component
-    return <OnboardingFlow communities={communities} />;
+    return <OnboardingFlow communities={communitiesForOnboarding} />;
   }
 
   // 4. If onboarded, fetch the rest of the dashboard data
-  const [communities, myRequests] = await Promise.all([
-    caller.community.getAllCommunities(), // This might be fetched again, could optimize if needed
+  const [allCommunitiesData_main, myRequests] = await Promise.all([
+    caller.community.getAllCommunities(),
     caller.feedback.getMyRequests(),
   ]);
+
+  const communitiesForDashboard: DashboardCommunity[] = [
+    ...allCommunitiesData_main.joinedCommunities.map(c => ({ 
+      id: c.id, 
+      name: c.name, 
+      description: c.description, 
+      memberCount: c._count.members 
+    })),
+    ...allCommunitiesData_main.availableCommunities.map(c => ({ 
+      id: c.id, 
+      name: c.name, 
+      description: c.description, 
+      memberCount: c._count.members 
+    }))
+  ];
 
   // 5. Render the main Dashboard component
   return (
@@ -40,7 +62,7 @@ export default async function DashboardPage() {
       <Navbar />
       <Dashboard
         initialCurrentUser={dbUser} // Already fetched
-        initialCommunities={communities}
+        initialCommunities={communitiesForDashboard}
         initialMyRequests={myRequests}
       />
     </>

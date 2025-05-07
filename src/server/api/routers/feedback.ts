@@ -22,19 +22,19 @@ import { FeedbackRequestStatus } from "@prisma/client";
 
 export const feedbackRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }): Promise<MyRequestItem[]> => {
-    const requests = await ctx.db.feedbackRequest.findMany({
+    const requestsWithData = await ctx.db.feedbackRequest.findMany({
       where: {
-        requesterId: ctx.internalUserId, // Use internal CUID
+        requesterId: ctx.internalUserId, // Use internalUserId directly
       },
-      select: {
+      select: { // Explicitly select all required fields
         id: true,
         requestType: true,
         status: true,
         createdAt: true,
-        contentText: true, 
-        contentUrl: true,  
-        context: true,
-        _count: { 
+        context: true, // Ensure context is selected
+        // Select any other fields from FeedbackRequest needed by mapPrismaToRequestType or mapPrismaToRequestStatus
+        // For now, assuming they only need the direct enum value
+        _count: {
           select: { responses: true },
         },
       },
@@ -43,13 +43,13 @@ export const feedbackRouter = createTRPCRouter({
       },
     });
 
-    return requests.map(req => ({
+    return requestsWithData.map(req => ({
       id: req.id,
-      type: mapPrismaToRequestType(req.requestType),
-      status: mapPrismaToRequestStatus(req.status),
+      type: mapPrismaToRequestType(req.requestType), // Relies on req.requestType
+      status: mapPrismaToRequestStatus(req.status),   // Relies on req.status
       createdAt: req.createdAt,
       feedbackCount: req._count.responses,
-      context: req.context,
+      context: req.context ?? undefined, // Convert null to undefined
     }));
   }),
 
@@ -186,7 +186,7 @@ export const feedbackRouter = createTRPCRouter({
         contentUrl: request.contentUrl,
         contentText: request.contentText,
         communities: request.targetCommunities.map((tc: { community: Pick<Community, 'id' | 'name'> }) => tc.community),
-        context: request.context,
+        context: request.context ?? undefined,
       };
   }),
 
