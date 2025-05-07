@@ -6,12 +6,16 @@ import { CoverLetterFeedbackForm } from "../coverletter/CoverLetterFeedbackForm"
 import { EmailFeedbackForm } from "../email/EmailFeedbackForm";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     type: string;
-  };
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function TypeSpecificFeedbackPage({ params }: PageProps) {
+export default async function TypeSpecificFeedbackPage({ params: paramsPromise, searchParams: searchParamsPromise }: PageProps) {
+  const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : undefined;
+
   switch (params.type) {
     case "resume":
       return <ResumeFeedbackForm />;
