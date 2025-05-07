@@ -9,7 +9,7 @@ interface PageProps {
   params: Promise<{
     type: string;
   }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function TypeSpecificFeedbackPage({ params: paramsPromise, searchParams: searchParamsPromise }: PageProps) {

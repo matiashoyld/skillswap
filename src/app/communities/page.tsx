@@ -87,7 +87,7 @@ export default function CommunitiesPage() {
                 key={community.id}
                 community={community}
                 isJoined={true}
-                onJoin={() => {}}
+                onJoin={() => { /* Already joined, no action */ }}
                 onLeave={() => leaveMutation.mutate({ communityId: community.id })}
               />
             ))}
@@ -105,7 +105,7 @@ export default function CommunitiesPage() {
                 community={community}
                 isJoined={false}
                 onJoin={() => joinMutation.mutate({ communityId: community.id })}
-                onLeave={() => {}}
+                onLeave={() => { /* Not joined, no action to leave */ }}
               />
             ))}
           </div>
