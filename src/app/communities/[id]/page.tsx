@@ -58,7 +58,7 @@ export default function CommunityDetailPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{community.name}</h1>
             <p className="text-gray-600">{community.description}</p>
           </div>
-          <Button variant="destructive">Leave Community</Button>
+
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
