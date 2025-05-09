@@ -113,23 +113,6 @@ export function CreditBalance({ currentUser }: CreditBalanceProps) {
               </div>
             </div>
           </div>
-
-          <div className="flex flex-col space-y-2">
-            <NextLink href="/dashboard?tab=available-requests">
-              <Button variant="outline" size="sm" className="flex items-center justify-center w-full">
-                <TrendingUp className="mr-1 h-4 w-4" /> Earn More
-              </Button>
-            </NextLink>
-            <NextLink href="/request" className="w-full">
-              <Button
-                variant="default"
-                size="sm"
-                className="flex items-center justify-center w-full bg-brand-primary hover:bg-brand-primary/90"
-              >
-                <Plus className="mr-1 h-4 w-4" /> Use Credits
-              </Button>
-            </NextLink>
-          </div>
         </div>
       </CardContent>
     </Card>
