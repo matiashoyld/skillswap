@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Navbar } from "~/components/navbar";
 
 export default function CommunitiesPage() {
   const utils = api.useUtils();
@@ -67,54 +68,57 @@ export default function CommunitiesPage() {
   const { joinedCommunities, availableCommunities } = data;
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" asChild>
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <ChevronLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Communities</h1>
-      </div>
-      
-      {joinedCommunities.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Your Communities</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {joinedCommunities.map((community) => (
-              <CommunityCard
-                key={community.id}
-                community={community}
-                isJoined={true}
-                onJoin={() => { /* Already joined, no action */ }}
-                onLeave={() => leaveMutation.mutate({ communityId: community.id })}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+    <>
+      <Navbar />
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" asChild>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <ChevronLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Communities</h1>
+        </div>
+        
+        {joinedCommunities.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Your Communities</h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {joinedCommunities.map((community) => (
+                <CommunityCard
+                  key={community.id}
+                  community={community}
+                  isJoined={true}
+                  onJoin={() => { /* Already joined, no action */ }}
+                  onLeave={() => leaveMutation.mutate({ communityId: community.id })}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {availableCommunities.length > 0 && (
-        <section>
-          <h2 className="text-2xl font-semibold mb-4">Available Communities</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {availableCommunities.map((community) => (
-              <CommunityCard
-                key={community.id}
-                community={community}
-                isJoined={false}
-                onJoin={() => joinMutation.mutate({ communityId: community.id })}
-                onLeave={() => { /* Not joined, no action to leave */ }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+        {availableCommunities.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Available Communities</h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {availableCommunities.map((community) => (
+                <CommunityCard
+                  key={community.id}
+                  community={community}
+                  isJoined={false}
+                  onJoin={() => joinMutation.mutate({ communityId: community.id })}
+                  onLeave={() => { /* Not joined, no action to leave */ }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {joinedCommunities.length === 0 && availableCommunities.length === 0 && (
-        <p className="text-gray-600">No communities available</p>
-      )}
-    </main>
+        {joinedCommunities.length === 0 && availableCommunities.length === 0 && (
+          <p className="text-gray-600">No communities available</p>
+        )}
+      </main>
+    </>
   );
 } 
