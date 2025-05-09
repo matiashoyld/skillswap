@@ -6,6 +6,7 @@ import { api } from "~/trpc/react";
 import { ProfileCard } from "~/components/profile-card";
 import { Button } from "~/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Navbar } from "~/components/navbar";
 
 export default function CommunityDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,36 +43,39 @@ export default function CommunityDetailPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <Link
-            href="/communities"
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Communities
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{community.name}</h1>
-          <p className="text-gray-600">{community.description}</p>
+    <>
+      <Navbar />
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <Link
+              href="/communities"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Communities
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{community.name}</h1>
+            <p className="text-gray-600">{community.description}</p>
+          </div>
+          <Button variant="destructive">Leave Community</Button>
         </div>
-        <Button variant="destructive">Leave Community</Button>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {community.members.map((member) => (
-          <ProfileCard
-            key={member.id}
-            imageUrl={member.imageUrl}
-            firstName={member.firstName}
-            lastName={member.lastName}
-            email={member.email}
-            communities={member.communities}
-            feedbackGiven={member.feedbackGiven}
-            memberSince={member.memberSince}
-          />
-        ))}
-      </div>
-    </main>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {community.members.map((member) => (
+            <ProfileCard
+              key={member.id}
+              imageUrl={member.imageUrl}
+              firstName={member.firstName}
+              lastName={member.lastName}
+              email={member.email}
+              communities={member.communities}
+              feedbackGiven={member.feedbackGiven}
+              memberSince={member.memberSince}
+            />
+          ))}
+        </div>
+      </main>
+    </>
   );
 } 
