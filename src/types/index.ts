@@ -167,7 +167,8 @@ export type AvailableRequestItem = {
     id: string;
     firstName: string | null;
     lastName: string | null;
-  }; // Note: Consider if the full User type is better here
+    imageUrl: string | null;
+  };
   communityId: string;
   communityName: string;
   context?: string;

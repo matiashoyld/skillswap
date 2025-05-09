@@ -85,7 +85,7 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true,
         contentUrl: true,
-        requester: { select: { id: true, firstName: true, lastName: true } }, // Select internal CUID
+        requester: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }, // MODIFIED: Added imageUrl
         targetCommunities: { select: { community: { select: { id: true, name: true } } } },
       },
       orderBy: {
@@ -103,9 +103,10 @@ export const feedbackRouter = createTRPCRouter({
           status: mapPrismaToRequestStatus(req.status),
           createdAt: req.createdAt,
           requester: {
-            id: req.requester.id, // This is the internal CUID
+            id: req.requester.id, 
             firstName: req.requester.firstName,
             lastName: req.requester.lastName,
+            imageUrl: req.requester.imageUrl, // ADDED: Pass imageUrl to the mapped response
           },
           communityId: relevantCommunity?.community.id ?? 'unknown',
           communityName: relevantCommunity?.community.name ?? 'Unknown Community',

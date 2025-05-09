@@ -2,15 +2,31 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { api } from '~/trpc/react';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import type { RouterOutputs } from '~/trpc/react';
-import { FileText, Link as LinkIcon, Mail, Briefcase, FileCheck, Filter, AlertCircle } from 'lucide-react';
+import { 
+  FileText, 
+  Link as LinkIcon, 
+  Mail, 
+  Briefcase, 
+  FileCheck, 
+  Filter, 
+  AlertCircle, 
+} from 'lucide-react';
 import type { RequestType, RequestStatus } from '~/types';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -22,7 +38,7 @@ const getRequestTypeIcon = (type: RequestType) => {
     case 'resume': return <FileText className="h-4 w-4" />;
     case 'portfolio': return <Briefcase className="h-4 w-4" />;
     case 'coverletter': return <FileCheck className="h-4 w-4" />;
-    default: return null;
+    default: return <Mail className="h-4 w-4" />;
   }
 };
 
@@ -56,17 +72,111 @@ const getStatusBadgeClasses = (status: RequestStatus): string => {
 // Define the type for a single request item based on the tRPC output
 type AvailableRequestItem = RouterOutputs['feedback']['getAvailableRequests'][number];
 
+// Inner Card Component based on user's example
+interface RequestCardProps {
+  request: AvailableRequestItem;
+}
+
+const SingleRequestCard: React.FC<RequestCardProps> = ({ request }) => {
+  const typeLabel = getRequestTypeLabel(request.type);
+  const daysAgo = formatDistanceToNow(new Date(request.createdAt), { addSuffix: true });
+  const requesterName = `${request.requester.firstName ?? ''} ${request.requester.lastName ?? ''}`.trim() || 'User';
+  const requesterInitial = (request.requester.firstName ? request.requester.firstName.charAt(0) : requesterName.charAt(0)).toUpperCase();
+
+  let statusClasses = "";
+  let statusLabel = request.status.replace('_', ' ');
+
+  switch (request.status) {
+    case 'pending':
+    case 'in_progress': // Treat in_progress similar to pending for color
+      statusClasses = "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-100";
+      statusLabel = request.status === 'in_progress' ? 'In Progress' : 'Pending';
+      break;
+    case 'completed':
+      statusClasses = "bg-green-50 text-green-600 hover:bg-green-100 border-green-100";
+      statusLabel = "Completed";
+      break;
+    default:
+      statusClasses = "bg-gray-100 text-gray-800 border-gray-200"; // Fallback status style
+  }
+
+  return (
+    <Card
+      className="py-0 overflow-hidden transition-all duration-200 hover:shadow-md border-neutral-100"
+    >
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-neutral-50 text-neutral-700">
+              {getRequestTypeIcon(request.type)}
+            </div>
+            <span className="text-sm font-medium text-neutral-900">{typeLabel}</span>
+            <Badge
+              variant="outline"
+              className="ml-1 text-xs font-normal text-neutral-500 bg-neutral-50 hover:bg-neutral-100 border-neutral-100"
+            >
+              {request.communityName}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-neutral-400">
+              {daysAgo}
+            </span>
+          </div>
+        </div>
+
+        {request.context && (
+          <div className="text-sm text-neutral-700 line-clamp-2">
+            {request.context}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2">
+            <Badge
+              variant={request.status === "pending" || request.status === "in_progress" ? "outline" : "default"}
+              className={statusClasses}
+            >
+              {statusLabel}
+            </Badge>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-neutral-500">Requested by</span>
+              <div className="flex items-center gap-1">
+                <Avatar className="h-5 w-5">
+                  {request.requester.imageUrl ? (
+                    <AvatarImage src={request.requester.imageUrl} alt={requesterName} />
+                  ) : null}
+                  <AvatarFallback className="bg-neutral-200 text-[10px] font-medium text-neutral-700">
+                    {requesterInitial}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs font-medium text-neutral-900">{requesterName}</span>
+              </div>
+            </div>
+          </div>
+
+          <Button
+            asChild
+            className={`text-sm font-medium bg-neutral-100 text-neutral-700 hover:bg-neutral-900 hover:text-white`}
+            size="sm"
+          >
+            <Link href={`/dashboard/give-feedback/${request.id}`}>Give Feedback</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const AvailableRequestsFeed: React.FC = () => {
   const { data: requests, isLoading: requestsLoading, error: requestsError } = api.feedback.getAvailableRequests.useQuery();
   const { data: communitiesData, isLoading: communitiesLoading, error: communitiesError } = api.community.getAllCommunities.useQuery();
 
-  // State for filters - use string type only, as 'all' is included
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
 
   const communities = useMemo(() => {
     if (!communitiesData) return [];
-    // Assuming joinedCommunities and availableCommunities items have id and name
     return [...communitiesData.joinedCommunities, ...communitiesData.availableCommunities];
   }, [communitiesData]);
 
@@ -89,9 +199,9 @@ export const AvailableRequestsFeed: React.FC = () => {
               <Skeleton className="h-10 w-32" />
             </div>
           </div>
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
         </div>
       );
   }
@@ -182,57 +292,12 @@ export const AvailableRequestsFeed: React.FC = () => {
          </Card>
       ) : (
         <div className="space-y-4">
-          {filteredRequests.map((request: AvailableRequestItem) => {
-            // Log the request ID being used to generate the link
-            console.log(`[AvailableRequestsFeed] Generating link for request ID: ${request.id}`); 
-            return (
-            <Card key={request.id} className="transition-all duration-200 hover:shadow-md">
-              <CardContent className="px-6">
-                <div className="flex flex-col space-y-3">
-                  {/* Top Row: Badges and Time */}
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-wrap gap-2 items-center">
-                      {/* Apply subtle orange background to type badge */}
-                      <Badge variant="outline" className="border-transparent bg-ui-orange text-brand-dark flex items-center space-x-1">
-                        {getRequestTypeIcon(request.type)}
-                        <span>{getRequestTypeLabel(request.type)}</span>
-                      </Badge>
-                      {/* Community badge can remain secondary or use ui-gray */}
-                      <Badge variant="secondary" className="bg-ui-gray text-brand-dark">
-                         {request.communityName}
-                      </Badge>
-                    </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
-                      {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
-                    </span>
-                  </div>
-
-                  {/* Middle Row: Context/Content Snippet */}
-                  {request.context && (
-                    <div>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {request.context}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Bottom Row: Status and Action Button */}
-                  <div className="flex justify-between items-center pt-2">
-                     {/* Apply dynamic status colors */}
-                     <Badge variant="outline" className={`border-transparent ${getStatusBadgeClasses(request.status)}`}>
-                        {request.status.replace('_', ' ')} 
-                     </Badge>
-
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/dashboard/give-feedback/${request.id}`}>
-                        Give Feedback
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )})}
+          {filteredRequests.map((request: AvailableRequestItem) => (
+            <SingleRequestCard 
+              key={request.id} 
+              request={request} 
+            />
+          ))}
         </div>
       )}
     </div>
