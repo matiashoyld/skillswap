@@ -97,17 +97,17 @@ export function mapPrismaToRequestStatus(status: PrismaFeedbackRequestStatus): R
 
 // Matches FeedbackEvaluationRating enum in schema.prisma and F-RecFeed-03 / F-Credit-04
 // Using numeric values for simplicity in potential calculations/sorting
-export const feedbackRatingValues = [5, 4, 3, 2, 1] as const;
-export type FeedbackRating = (typeof feedbackRatingValues)[number]; // 5: Super Insightful, ..., 1: Harmful
+export const feedbackRatingValues = [5, 4, 3] as const;
+export type FeedbackRating = (typeof feedbackRatingValues)[number]; // 5: Super Insightful, 4: Helpful, 3: Okay
 
 export function mapRatingToPrisma(rating: FeedbackRating): PrismaFeedbackEvaluationRating {
     switch (rating) {
       case 5: return PrismaFeedbackEvaluationRating.SUPER_INSIGHTFUL;
       case 4: return PrismaFeedbackEvaluationRating.HELPFUL;
       case 3: return PrismaFeedbackEvaluationRating.OKAY;
-      case 2: return PrismaFeedbackEvaluationRating.NOT_HELPFUL;
-      case 1: return PrismaFeedbackEvaluationRating.HARMFUL;
     }
+    // Should not happen with proper type checking, but as a fallback:
+    throw new Error(`Invalid rating: ${rating}`);
   }
 
 export function mapPrismaToRating(rating: PrismaFeedbackEvaluationRating): FeedbackRating {
@@ -115,8 +115,9 @@ export function mapPrismaToRating(rating: PrismaFeedbackEvaluationRating): Feedb
     case PrismaFeedbackEvaluationRating.SUPER_INSIGHTFUL: return 5;
     case PrismaFeedbackEvaluationRating.HELPFUL: return 4;
     case PrismaFeedbackEvaluationRating.OKAY: return 3;
-    case PrismaFeedbackEvaluationRating.NOT_HELPFUL: return 2;
-    case PrismaFeedbackEvaluationRating.HARMFUL: return 1;
+    // If NOT_HELPFUL or HARMFUL are somehow still in the DB, map them to OKAY or handle as error
+    // For now, let's throw an error if unexpected values are encountered from DB
+    default: throw new Error(`Unexpected Prisma rating: ${rating}`);
   }
 }
 
@@ -140,8 +141,7 @@ export const RATING_REWARDS: Record<FeedbackRating, number> = {
   5: 2, // Super Insightful
   4: 1, // Helpful
   3: 0, // Okay
-  2: -1, // Not Helpful
-  1: -2, // Harmful / Not Useful
+  // Removed NOT_HELPFUL (2) and HARMFUL (1) entries
 };
 
 

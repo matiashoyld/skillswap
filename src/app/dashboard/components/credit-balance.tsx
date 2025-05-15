@@ -84,13 +84,9 @@ export function CreditBalance({ currentUser }: CreditBalanceProps) {
                       case 3:
                         ratingLabel = "Okay"
                         break
-                      case 2:
-                        ratingLabel = "Not Helpful"
-                        break
-                      case 1:
-                        ratingLabel = "Harmful"
-                        break
                     }
+
+                    if (!ratingLabel) return null;
 
                     return (
                       <div key={rating} className="flex items-center justify-between text-sm">
