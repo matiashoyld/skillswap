@@ -209,8 +209,14 @@ export const feedbackRouter = createTRPCRouter({
       if (request.requesterId === ctx.internalUserId) {
         throw new Error("You cannot give feedback on your own request.");
       }
-      if (request.status !== PrismaStatus.PENDING) { // Use Prisma enum for check
-        throw new Error("This request is no longer accepting feedback.");
+      // Ensure request is PENDING or IN_PROGRESS (if multiple feedbacks are allowed later)
+      // For now, strict PENDING for first feedback, IN_PROGRESS implies feedback already given.
+      // If the goal is to award credits for *each* feedback, this logic might change.
+      // Based on "when someone already has given feedback" moves to IN_PROGRESS,
+      // it seems one feedback moves it to IN_PROGRESS.
+      // For awarding credits, we should allow feedback if PENDING.
+      if (request.status !== PrismaStatus.PENDING) {
+        throw new Error("This request is no longer accepting feedback or has already received initial feedback.");
       }
 
       // 2. Verify user is allowed to give feedback (part of target community)
@@ -218,40 +224,48 @@ export const feedbackRouter = createTRPCRouter({
         where: { userId: ctx.internalUserId },
         select: { communityId: true }
       });
-      const userMemberCommunityIds = userMemberCommunities.map((c: Pick<UserCommunity, 'communityId'>) => c.communityId);
-      const requestTargetCommunityIds = request.targetCommunities.map((c: { communityId: string }) => c.communityId);
-      const isAllowed = requestTargetCommunityIds.some((id: string) => userMemberCommunityIds.includes(id));
+      const userMemberCommunityIds = userMemberCommunities.map((c) => c.communityId);
+      const requestTargetCommunityIds = request.targetCommunities.map((c) => c.communityId);
+      const isAllowed = requestTargetCommunityIds.some((id) => userMemberCommunityIds.includes(id));
       if (!isAllowed) {
         throw new Error("Unauthorized: You are not a member of any community this request was sent to.");
       }
 
-      // 3. Create the feedback response
-      const newResponse = await ctx.db.feedbackResponse.create({
-        data: {
-          feedbackText: input.feedbackText,
-          requestId: input.requestId,
-          responderId: ctx.internalUserId, // Use the internal CUID
-        },
-        select: { id: true },
+      const requestTypeKey = mapPrismaToRequestType(request.requestType);
+      const creditsToAward = CREDIT_COSTS[requestTypeKey];
+
+      // 3. Perform operations in a transaction
+      const result = await ctx.db.$transaction(async (prisma) => {
+        // Create the feedback response
+        const newResponse = await prisma.feedbackResponse.create({
+          data: {
+            feedbackText: input.feedbackText,
+            requestId: input.requestId,
+            responderId: ctx.internalUserId,
+          },
+          select: { id: true },
+        });
+
+        // Update request status to IN_PROGRESS
+        await prisma.feedbackRequest.update({
+          where: { id: input.requestId },
+          data: { status: PrismaStatus.IN_PROGRESS },
+        });
+
+        // Award credits to the feedback provider
+        await prisma.user.update({
+          where: { id: ctx.internalUserId },
+          data: {
+            credits: {
+              increment: creditsToAward,
+            },
+          },
+        });
+
+        return { responseId: newResponse.id, creditsAwarded: creditsToAward };
       });
 
-      // 4. Update request status to IN_PROGRESS
-      try {
-        await ctx.db.feedbackRequest.update({
-          where: { id: input.requestId },
-          data: { status: PrismaStatus.IN_PROGRESS }, // Use Prisma enum
-        });
-      } catch (updateError) {
-        console.error(`[submitResponse] Failed to update status for request ${input.requestId}:`, updateError);
-      }
-
-      // 5. TODO: Award credits to the feedback provider (responder)
-      // Implement logic based on F-Credit-03 & F-Credit-04
-      // Needs: 
-      // - Credit reward mapping from `request.requestType` (use FEEDBACK_REWARDS from types)
-      // - `ctx.db.user.update` to increment responder's credits
-
-      return { success: true, responseId: newResponse.id };
+      return { success: true, responseId: result.responseId, creditsEarned: result.creditsAwarded };
     }),
 
   createRequest: protectedProcedure

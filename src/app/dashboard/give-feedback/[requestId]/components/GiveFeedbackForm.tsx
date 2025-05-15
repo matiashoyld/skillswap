@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { toast } from "sonner";
 import { FileText, Link as LinkIcon, Mail, Briefcase, FileCheck, ChevronLeft, UserCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { RequestContentDisplay } from './RequestContentDisplay';
+import { CreditsEarnedDialog } from './CreditsEarnedDialog';
 
 // Use RequestDetailsItem defined in types/index.ts
 // type FeedbackRequestDetails = NonNullable<RouterOutputs['feedback']['getRequestById']>;
@@ -101,22 +102,29 @@ const getRequestTypeLabel = (type: RequestType) => {
 
 export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) => {
   const router = useRouter();
+  const utils = api.useUtils();
   const [feedbackText, setFeedbackText] = useState('');
+  const [showCreditsEarnedDialog, setShowCreditsEarnedDialog] = useState(false);
+  const [creditsEarned, setCreditsEarned] = useState(0);
 
   const submitFeedbackMutation = api.feedback.submitResponse.useMutation({
-    onSuccess: (_data) => {
+    onSuccess: (data) => {
       toast.success("Feedback Submitted!", {
          description: "Thank you for contributing to the community.",
       });
-      // TODO: Award credits based on F-Credit-03 (likely done on backend, but confirm)
       
-      // Navigate away first
-      router.push('/dashboard?tab=give-feedback'); 
+      if (data.creditsEarned && data.creditsEarned > 0) {
+        setCreditsEarned(data.creditsEarned);
+        setShowCreditsEarnedDialog(true);
+      }
+      
+      // Invalidate user query to update credit balance display
+      utils.user.getCurrent.invalidate();
 
-      // Commenting out invalidate as it causes hook errors during navigation
-      // The available requests list should ideally be refetched or updated via cache manipulation
-      // after navigation, perhaps in the dashboard component itself.
-      // api.useUtils().feedback.getAvailableRequests.invalidate();
+      // Optionally delay navigation or handle it after dialog close
+      // For now, let's keep the navigation but it might close the dialog prematurely
+      // Consider closing the dialog first then navigating, or navigating from the dialog's close button
+      // router.push('/dashboard?tab=give-feedback'); 
     },
     onError: (error) => {
       toast.error("Submission Failed", {
@@ -137,7 +145,8 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <>
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Back Button */}
         <div className="mb-6">
             <Button asChild variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
@@ -232,6 +241,18 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
           </form>
         </CardContent>
       </Card>
-    </div>
+      </div>
+      <CreditsEarnedDialog
+        isOpen={showCreditsEarnedDialog}
+        onOpenChange={(isOpen) => {
+          setShowCreditsEarnedDialog(isOpen);
+          if (!isOpen) {
+            // Navigate when dialog is closed
+            router.push('/dashboard?tab=give-feedback');
+          }
+        }}
+        creditsEarned={creditsEarned}
+      />
+    </>
   );
 }; 
