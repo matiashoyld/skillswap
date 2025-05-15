@@ -13,8 +13,8 @@ import {
 
 // Import Prisma types needed for logic/checks
 import { FeedbackRequestStatus as PrismaStatus } from '@prisma/client';
-import type { UserCommunity, Community } from '@prisma/client';
-import { CREDIT_COSTS } from "~/types";
+import type { UserCommunity, Community, FeedbackEvaluationRating as PrismaFeedbackEvaluationRating } from '@prisma/client';
+import { CREDIT_COSTS, RATING_REWARDS, mapRatingToPrisma, type FeedbackRating } from "~/types";
 import { mapRequestTypeToPrisma } from "~/types";
 import { FeedbackRequestStatus } from "@prisma/client";
 
@@ -148,6 +148,60 @@ export const feedbackRouter = createTRPCRouter({
 
     return mappedRequests;
   }),
+
+  getRequestWithResponsesAndEvaluations: protectedProcedure
+    .input(z.object({ requestId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.feedbackRequest.findUnique({
+        where: {
+          id: input.requestId,
+          requesterId: ctx.internalUserId, // Crucial: User must be the requester
+        },
+        include: {
+          requester: {
+            select: { id: true, firstName: true, lastName: true, imageUrl: true },
+          },
+          targetCommunities: {
+            select: {
+              community: { select: { id: true, name: true } },
+            },
+          },
+          responses: {
+            include: {
+              responder: {
+                select: { id: true, firstName: true, lastName: true, imageUrl: true },
+              },
+              evaluation: true, // Include the evaluation for each response
+            },
+            orderBy: {
+              createdAt: 'asc', // Show feedback in order it was given
+            },
+          },
+        },
+      });
+
+      if (!request) {
+        throw new Error("Request not found or you are not authorized to view it.");
+      }
+
+      // Map to a structure similar to RequestDetailsItem but with full responses
+      return {
+        id: request.id,
+        type: mapPrismaToRequestType(request.requestType),
+        status: mapPrismaToRequestStatus(request.status),
+        createdAt: request.createdAt,
+        requester: request.requester, // Already selected needed fields
+        contentUrl: request.contentUrl,
+        contentText: request.contentText,
+        context: request.context ?? undefined,
+        communities: request.targetCommunities.map((tc: any) => tc.community),
+        responses: request.responses.map(response => ({
+          ...response,
+          // responder is already included with selected fields
+          // evaluation is already included
+        })),
+      };
+    }),
 
   getRequestById: protectedProcedure
     .input(z.object({ requestId: z.string() }))
@@ -299,6 +353,70 @@ export const feedbackRouter = createTRPCRouter({
       });
 
       return { success: true, responseId: result.responseId, creditsEarned: result.creditsAwarded };
+    }),
+
+  submitEvaluation: protectedProcedure
+    .input(z.object({
+      feedbackResponseId: z.string(),
+      rating: z.union([z.literal(3), z.literal(4), z.literal(5)] as const),
+      responseText: z.string().max(1000).optional().nullable(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { feedbackResponseId, rating, responseText } = input;
+
+      const feedbackResponse = await ctx.db.feedbackResponse.findUnique({
+        where: { id: feedbackResponseId },
+        include: {
+          request: true,
+          responder: true,
+          evaluation: true,
+        },
+      });
+
+      if (!feedbackResponse) {
+        throw new Error("Feedback response not found.");
+      }
+      if (feedbackResponse.evaluation) {
+        throw new Error("This feedback has already been evaluated.");
+      }
+      if (feedbackResponse.request.requesterId !== ctx.internalUserId) {
+        throw new Error("Unauthorized: You are not the requester of this feedback.");
+      }
+      if (feedbackResponse.request.status !== PrismaStatus.IN_PROGRESS) {
+        throw new Error("Feedback can only be evaluated if the request is In Progress.");
+      }
+      
+      const prismaRating: PrismaFeedbackEvaluationRating = mapRatingToPrisma(rating);
+      const bonusCredits: number = RATING_REWARDS[rating];
+
+      return ctx.db.$transaction(async (prisma) => {
+        const newEvaluation = await prisma.feedbackEvaluation.create({
+          data: {
+            responseId: feedbackResponseId,
+            evaluatorId: ctx.internalUserId,
+            rating: prismaRating,
+            evaluationText: responseText,
+          },
+        });
+
+        await prisma.feedbackRequest.update({
+          where: { id: feedbackResponse.request.id },
+          data: { status: PrismaStatus.COMPLETED },
+        });
+
+        if (bonusCredits > 0) {
+          await prisma.user.update({
+            where: { id: feedbackResponse.responderId },
+            data: {
+              credits: {
+                increment: bonusCredits,
+              },
+            },
+          });
+        }
+
+        return { success: true, evaluationId: newEvaluation.id, awardedCredits: bonusCredits };
+      });
     }),
 
   createRequest: protectedProcedure

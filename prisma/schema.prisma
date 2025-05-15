@@ -95,6 +95,7 @@ model FeedbackResponse {
 model FeedbackEvaluation {
   id          String                   @id @default(cuid())
   rating      FeedbackEvaluationRating
+  evaluationText String?
   responseId  String                   @unique
   evaluatorId String
   createdAt   DateTime                 @default(now())
