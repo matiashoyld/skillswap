@@ -241,6 +241,29 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
           </form>
         </CardContent>
       </Card>
+
+      {/* Guidelines Card */}
+      <Card className="mt-8">
+        <CardContent>
+          <p className="text-base font-medium text-gray-600 mb-2">
+            Tips for providing feedback
+          </p>
+          <ul className="space-y-3 text-sm text-gray-600">
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Be specific and actionable</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Be respectful and constructive</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Provide examples where possible</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
       <CreditsEarnedDialog
         isOpen={showCreditsEarnedDialog}
