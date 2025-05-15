@@ -106,6 +106,21 @@ export function Dashboard({
     }
   }
 
+  const getRequestStatusLabel = (status: MyRequestItem['status']): string => {
+    switch (status) {
+      case "pending":
+        return "Awaiting Feedback";
+      case "in_progress":
+        return "Awaiting Feedback Rating";
+      case "completed":
+        return "Feedback Rated";
+      default:
+        // Fallback for any unexpected status values
+        const exhaustiveCheck: never = status;
+        return exhaustiveCheck;
+    }
+  };
+
   const formatDate = (date: Date | string) => {
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -234,7 +249,7 @@ export function Dashboard({
                                           : "bg-blue-100 text-blue-800 hover:bg-blue-100"
                                     }
                                   >
-                                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                    {getRequestStatusLabel(request.status)}
                                   </Badge>
                                 </div>
                                 <span className="text-xs text-gray-500">{formatDate(request.createdAt)}</span>

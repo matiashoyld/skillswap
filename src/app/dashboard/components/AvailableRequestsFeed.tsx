@@ -83,21 +83,35 @@ const SingleRequestCard: React.FC<RequestCardProps> = ({ request }) => {
   const requesterName = `${request.requester.firstName ?? ''} ${request.requester.lastName ?? ''}`.trim() || 'User';
   const requesterInitial = (request.requester.firstName ? request.requester.firstName.charAt(0) : requesterName.charAt(0)).toUpperCase();
 
-  let statusClasses = "";
-  let statusLabel = request.status.replace('_', ' ');
+  const getStatusColorClass = (status: RequestStatus): string => {
+    switch (status) {
+      case 'pending':
+        return 'bg-status-pending text-brand-dark';
+      case 'in_progress':
+        return 'bg-status-in-progress text-brand-dark';
+      case 'completed':
+        return 'bg-status-completed text-brand-dark';
+      default:
+        return 'bg-gray-200 text-gray-700';
+    }
+  };
+
+  let statusLabel: string;
+  const statusColorClass = getStatusColorClass(request.status);
 
   switch (request.status) {
     case 'pending':
-    case 'in_progress': // Treat in_progress similar to pending for color
-      statusClasses = "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-100";
-      statusLabel = request.status === 'in_progress' ? 'In Progress' : 'Pending';
+      statusLabel = "Awaiting Feedback";
+      break;
+    case 'in_progress':
+      statusLabel = "Awaiting Feedback Rating";
       break;
     case 'completed':
-      statusClasses = "bg-green-50 text-green-600 hover:bg-green-100 border-green-100";
-      statusLabel = "Completed";
+      statusLabel = "Feedback Rated";
       break;
     default:
-      statusClasses = "bg-gray-100 text-gray-800 border-gray-200"; // Fallback status style
+      statusLabel = request.status;
+      break;
   }
 
   return (
@@ -135,7 +149,7 @@ const SingleRequestCard: React.FC<RequestCardProps> = ({ request }) => {
           <div className="flex items-center gap-2">
             <Badge
               variant={request.status === "pending" || request.status === "in_progress" ? "outline" : "default"}
-              className={statusClasses}
+              className={statusColorClass}
             >
               {statusLabel}
             </Badge>
