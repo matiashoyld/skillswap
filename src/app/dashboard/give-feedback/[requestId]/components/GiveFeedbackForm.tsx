@@ -146,7 +146,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Back Button */}
         <div className="mb-6">
             <Button asChild variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
@@ -241,7 +241,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
           </form>
         </CardContent>
       </Card>
-      </div>
+    </div>
       <CreditsEarnedDialog
         isOpen={showCreditsEarnedDialog}
         onOpenChange={(isOpen) => {

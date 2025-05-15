@@ -104,7 +104,7 @@ async function main() {
        create: bobData,
    });
   console.log(`Upserted user: ${user2.firstName} (ID: ${user2.id})`);
-  
+
   // --- Add Users to Communities ---
   // This ensures Alice is in SE and UX, Bob is in SE.
   const userCommunityData = [
@@ -182,7 +182,7 @@ async function main() {
 
   // Example of a COMPLETED request: Alice evaluates Bob's feedback on her resume
   await prisma.feedbackEvaluation.create({
-    data: {
+     data: {
         responseId: feedbackOnRequest1.id,
         evaluatorId: user1.id, // Alice evaluates
         rating: "SUPER_INSIGHTFUL",
@@ -197,7 +197,7 @@ async function main() {
   await prisma.user.update({
     where: { id: user2.id }, // Bob gets credits
     data: { credits: { increment: 2 } }
-  });
+   });
   console.log(`Alice evaluated Bob's feedback (Response ID: ${feedbackOnRequest1.id}), request ${request1.id} set to COMPLETED. Bob awarded 2 credits.`);
 
 

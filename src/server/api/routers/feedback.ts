@@ -201,7 +201,7 @@ export const feedbackRouter = createTRPCRouter({
           // evaluation is already included
         })),
       };
-    }),
+  }),
 
   getRequestById: protectedProcedure
     .input(z.object({ requestId: z.string() }))
@@ -325,13 +325,13 @@ export const feedbackRouter = createTRPCRouter({
       const result = await ctx.db.$transaction(async (prisma) => {
         // Create the feedback response
         const newResponse = await prisma.feedbackResponse.create({
-          data: {
-            feedbackText: input.feedbackText,
-            requestId: input.requestId,
+        data: {
+          feedbackText: input.feedbackText,
+          requestId: input.requestId,
             responderId: ctx.internalUserId,
-          },
-          select: { id: true },
-        });
+        },
+        select: { id: true },
+      });
 
         // Update request status to IN_PROGRESS
         await prisma.feedbackRequest.update({

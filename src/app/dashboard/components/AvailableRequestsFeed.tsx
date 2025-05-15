@@ -170,13 +170,13 @@ const SingleRequestCard: React.FC<RequestCardProps> = ({ request }) => {
           </div>
 
           {request.status === 'pending' ? (
-            <Button
-              asChild
-              className={`text-sm font-medium bg-neutral-100 text-neutral-700 hover:bg-neutral-900 hover:text-white`}
-              size="sm"
-            >
-              <Link href={`/dashboard/give-feedback/${request.id}`}>Give Feedback</Link>
-            </Button>
+          <Button
+            asChild
+            className={`text-sm font-medium bg-neutral-100 text-neutral-700 hover:bg-neutral-900 hover:text-white`}
+            size="sm"
+          >
+            <Link href={`/dashboard/give-feedback/${request.id}`}>Give Feedback</Link>
+          </Button>
           ) : request.status === 'in_progress' ? (
             <Button
               variant="outline"

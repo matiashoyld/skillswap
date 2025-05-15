@@ -118,11 +118,11 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
     },
   });
 
-  // RATING_OPTIONS for this form component
-  const FORM_RATING_OPTIONS: { value: FeedbackRating; label: string; stars: number }[] = [
-    { value: 5, label: "Super Insightful (+2)", stars: 5 }, 
-    { value: 4, label: "Helpful (+1)", stars: 4 },
-    { value: 3, label: "Okay (+0)", stars: 3 },
+  // RATING_OPTIONS for this form component, ordered for left-to-right display
+  const RATING_DISPLAY_OPTIONS: { value: FeedbackRating; label: string; activeColor: string; hoverColor: string; bgColor: string; }[] = [
+    { value: 3, label: "Okay (+0)", activeColor: "text-yellow-400 fill-yellow-400", hoverColor: "hover:text-yellow-500", bgColor: "hover:bg-yellow-50"},
+    { value: 4, label: "Helpful (+1)", activeColor: "text-lime-500 fill-lime-500", hoverColor: "hover:text-lime-600", bgColor: "hover:bg-lime-50" }, 
+    { value: 5, label: "Super Insightful (+2)", activeColor: "text-green-600 fill-green-600", hoverColor: "hover:text-green-700", bgColor: "hover:bg-green-50" },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -139,15 +139,15 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
   };
 
   if (isAlreadyEvaluated) {
-    const displayRatingOption = FORM_RATING_OPTIONS.find(opt => opt.value === rating);
+    const displayRatingOption = RATING_DISPLAY_OPTIONS.find(opt => opt.value === rating);
     return (
       <div className="mt-4 rounded-md border border-green-200 bg-green-50 p-4">
         <p className="text-sm font-semibold text-green-800">Your Rating:</p>
         <div className="my-2 flex items-center">
-          {FORM_RATING_OPTIONS.map((opt) => (
+          {RATING_DISPLAY_OPTIONS.map((opt) => (
             <StarIcon
               key={opt.value}
-              className={`h-6 w-6 ${opt.stars <= (FORM_RATING_OPTIONS.find(r => r.value === rating)?.stars ?? 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+              className={`h-6 w-6 ${(rating ?? 0) >= opt.value ? opt.activeColor : "text-gray-300"}`}
             />
           ))}
            {displayRatingOption && <span className="ml-2 text-sm text-green-700 font-medium">{displayRatingOption.label}</span>}
@@ -167,16 +167,17 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
       <div>
         <Label className="mb-2 block text-sm font-medium text-gray-700">Your Rating:</Label>
         <div className="flex space-x-1">
-          {FORM_RATING_OPTIONS.map((opt) => (
+          {RATING_DISPLAY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setRating(opt.value)}
-              className={`rounded-full p-1.5 hover:bg-gray-100 ${rating === opt.value ? "bg-yellow-50" : ""}`}
-              aria-label={`Rate ${opt.stars} stars - ${opt.label}`}
+              className={`rounded-full p-1.5 ${opt.bgColor} ${(rating ?? 0) >= opt.value ? '' : 'opacity-60'}`}
+              aria-label={`Rate ${opt.label}`}
+              title={opt.label}
             >
               <StarIcon
-                className={`h-7 w-7 ${opt.stars <= (FORM_RATING_OPTIONS.find(r => r.value === rating)?.stars ?? 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                className={`h-7 w-7 ${ (rating ?? 0) >= opt.value ? opt.activeColor : "text-gray-300 hover:text-gray-400"} ${opt.hoverColor}`}
               />
             </button>
           ))}
