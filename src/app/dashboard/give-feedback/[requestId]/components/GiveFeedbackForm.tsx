@@ -119,7 +119,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
       }
       
       // Invalidate user query to update credit balance display
-      utils.user.getCurrent.invalidate();
+      void utils.user.getCurrent.invalidate();
 
       // Optionally delay navigation or handle it after dialog close
       // For now, let's keep the navigation but it might close the dialog prematurely

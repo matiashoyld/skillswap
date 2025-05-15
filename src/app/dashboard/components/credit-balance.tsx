@@ -1,18 +1,18 @@
 "use client"
 
-import { TrendingUp, Plus, FileText, LucideLink, Mail, Briefcase, FileCheck } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
-import { CREDIT_COSTS, RATING_REWARDS, type RequestType, type User, type FeedbackRating } from "../../../types"
-import NextLink from "next/link"
+import React from 'react';
+import { FileText, Link as LinkIcon, Mail, Briefcase, FileCheck } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+import type { DashboardUser, RequestType, FeedbackRating } from "~/types";
+import { CREDIT_COSTS, RATING_REWARDS } from "~/types"
 
-type CreditBalanceProps = {
-  currentUser: Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'credits' | 'imageUrl'> | null | undefined;
+interface CreditBalanceProps {
+  currentUser: Pick<DashboardUser, 'id' | 'firstName' | 'lastName' | 'email' | 'credits' | 'imageUrl'> | null | undefined;
 };
 
 export function CreditBalance({ currentUser }: CreditBalanceProps) {
-  const requestTypes: { type: RequestType; icon: typeof FileText; label: string }[] = [
-    { type: "linkedin", icon: LucideLink, label: "LinkedIn Profile" },
+  const requestTypes: { type: RequestType; icon: React.ElementType; label: string }[] = [
+    { type: "linkedin", icon: LinkIcon, label: "LinkedIn Profile" },
     { type: "email", icon: Mail, label: "Cold Email" },
     { type: "resume", icon: FileText, label: "Resume" },
     { type: "portfolio", icon: Briefcase, label: "Portfolio" },

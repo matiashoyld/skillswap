@@ -1,7 +1,7 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { api } from "~/trpc/react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "~/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   ChevronLeft,
@@ -12,7 +12,6 @@ import {
   Briefcase,
   FileCheck,
   Star as StarIcon,
-  MessageSquare,
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
@@ -24,9 +23,10 @@ import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
 import React, { useState } from "react";
 import type { FeedbackRating, RequestDetailsItem as PageRequestDetailsItem } from "~/types";
-import { mapPrismaToRating, mapPrismaToRequestType, mapPrismaToRequestStatus } from "~/types";
+import { mapPrismaToRating } from "~/types";
+import type { mapPrismaToRequestType, mapPrismaToRequestStatus } from "~/types";
 import { Badge } from "~/components/ui/badge";
-import type { FeedbackEvaluation, FeedbackResponse, User as PrismaUser, Community as PrismaCommunity, FeedbackRequestStatus as PrismaFeedbackRequestStatus, FeedbackRequestType as PrismaFeedbackRequestType, FeedbackEvaluationRating as PrismaFeedbackEvaluationRating } from "@prisma/client";
+import type { FeedbackEvaluation, FeedbackResponse, User as PrismaUser, Community as PrismaCommunity } from "@prisma/client";
 
 // Helper function to map RequestType to icon
 const getRequestTypeIcon = (type: string) => {
@@ -108,8 +108,8 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
       toast.success("Evaluation Submitted!", {
         description: `The feedback provider earned ${data.awardedCredits} bonus credits.`,
       });
-      utils.feedback.getRequestWithResponsesAndEvaluations.invalidate({ requestId });
-      utils.user.getCurrent.invalidate(); 
+      void utils.feedback.getRequestWithResponsesAndEvaluations.invalidate({ requestId });
+      void utils.user.getCurrent.invalidate();
     },
     onError: (error) => {
       toast.error("Evaluation Failed", {
@@ -267,7 +267,7 @@ export default function MyRequestDetailsPage() {
                     Request Not Found
                   </h2>
                   <p className="text-gray-600">
-                    {error?.message || "The request you're looking for doesn't exist or you don't have permission to view it."}
+                    {error?.message ?? "The request you're looking for doesn't exist or you don't have permission to view it."}
                   </p>
                 </div>
               </CardContent>
@@ -377,7 +377,7 @@ export default function MyRequestDetailsPage() {
               <FeedbackEvaluationForm 
                 feedbackResponseId={responseItem.id}
                 requestId={request.id}
-                currentRating={responseItem.evaluation ? mapPrismaToRating(responseItem.evaluation.rating as PrismaFeedbackEvaluationRating) : null}
+                currentRating={responseItem.evaluation ? mapPrismaToRating(responseItem.evaluation.rating) : null}
                 currentEvaluationText={responseItem.evaluation?.evaluationText ?? null}
                 isAlreadyEvaluated={!!responseItem.evaluation}
               />

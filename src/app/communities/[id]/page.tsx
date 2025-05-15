@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "~/trpc/react";
 import { ProfileCard } from "~/components/profile-card";
-import { Button } from "~/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Navbar } from "~/components/navbar";
 

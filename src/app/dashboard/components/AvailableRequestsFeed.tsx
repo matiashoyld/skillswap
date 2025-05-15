@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+// import Image from 'next/image'; // Removed unused import
 import { api } from '~/trpc/react';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
@@ -56,18 +56,18 @@ const getRequestTypeLabel = (type: RequestType) => {
 
 // Helper function to map RequestStatus (lowercase string from API) to badge classes
 // Returns a string of Tailwind classes
-const getStatusBadgeClasses = (status: RequestStatus): string => {
-  switch (status) {
-    case 'pending': 
-      return 'bg-status-pending text-brand-dark';
-    case 'in_progress': 
-      return 'bg-status-inprogress text-brand-dark';
-    case 'completed': 
-      return 'bg-status-completed text-brand-dark';
-    default: 
-      return 'bg-ui-gray text-brand-dark';
-  }
-};
+// const getStatusBadgeClasses = (status: RequestStatus): string => { // Removed unused function
+//   switch (status) {
+//     case 'pending': 
+//       return 'bg-status-pending text-brand-dark';
+//     case 'in_progress': 
+//       return 'bg-status-inprogress text-brand-dark';
+//     case 'completed': 
+//       return 'bg-status-completed text-brand-dark';
+//     default: 
+//       return 'bg-ui-gray text-brand-dark';
+//   }
+// };
 
 // Define the type for a single request item based on the tRPC output
 type AvailableRequestItem = RouterOutputs['feedback']['getAvailableRequests'][number];

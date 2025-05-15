@@ -14,7 +14,7 @@ import {
 // Import Prisma types needed for logic/checks
 import { FeedbackRequestStatus as PrismaStatus } from '@prisma/client';
 import type { UserCommunity, Community, FeedbackEvaluationRating as PrismaFeedbackEvaluationRating } from '@prisma/client';
-import { CREDIT_COSTS, RATING_REWARDS, mapRatingToPrisma, type FeedbackRating } from "~/types";
+import { CREDIT_COSTS, RATING_REWARDS, mapRatingToPrisma } from "~/types";
 import { mapRequestTypeToPrisma } from "~/types";
 import { FeedbackRequestStatus } from "@prisma/client";
 
@@ -194,7 +194,7 @@ export const feedbackRouter = createTRPCRouter({
         contentUrl: request.contentUrl,
         contentText: request.contentText,
         context: request.context ?? undefined,
-        communities: request.targetCommunities.map((tc: any) => tc.community),
+        communities: request.targetCommunities.map((tc: { community: { id: string; name: string } }) => tc.community),
         responses: request.responses.map(response => ({
           ...response,
           // responder is already included with selected fields

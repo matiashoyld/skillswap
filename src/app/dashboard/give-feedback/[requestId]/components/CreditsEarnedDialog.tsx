@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { CheckCircle, PartyPopper } from "lucide-react";
+import { PartyPopper } from "lucide-react";
 
 interface CreditsEarnedDialogProps {
   isOpen: boolean;

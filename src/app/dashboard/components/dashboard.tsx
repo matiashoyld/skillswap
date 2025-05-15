@@ -115,9 +115,10 @@ export function Dashboard({
       case "completed":
         return "Feedback Rated";
       default:
-        // Fallback for any unexpected status values
-        const exhaustiveCheck: never = status;
-        return exhaustiveCheck;
+        // This case should be unreachable if 'status' is always a valid RequestStatus
+        // const exhaustiveCheck: never = status;
+        console.error("Unknown status encountered in getRequestStatusLabel. This should be unreachable.");
+        return "Unknown Status"; 
     }
   };
 

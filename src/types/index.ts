@@ -107,7 +107,7 @@ export function mapRatingToPrisma(rating: FeedbackRating): PrismaFeedbackEvaluat
       case 3: return PrismaFeedbackEvaluationRating.OKAY;
     }
     // Should not happen with proper type checking, but as a fallback:
-    throw new Error(`Invalid rating: ${rating}`);
+    throw new Error("Invalid rating: " + String(rating));
   }
 
 export function mapPrismaToRating(rating: PrismaFeedbackEvaluationRating): FeedbackRating {
