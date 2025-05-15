@@ -64,12 +64,11 @@ export const feedbackRouter = createTRPCRouter({
       return [];
     }
 
-    const availableRequests = await ctx.db.feedbackRequest.findMany({
+    const requestsFromDb = await ctx.db.feedbackRequest.findMany({
       where: {
         requesterId: {
-          not: ctx.internalUserId,
+          not: ctx.internalUserId, // User cannot act on their own requests here
         },
-        status: PrismaStatus.PENDING,
         targetCommunities: {
           some: {
             communityId: {
@@ -77,6 +76,23 @@ export const feedbackRouter = createTRPCRouter({
             },
           },
         },
+        OR: [
+          {
+            status: PrismaStatus.PENDING,
+          },
+          {
+            status: PrismaStatus.IN_PROGRESS,
+            responses: {
+              some: { responderId: ctx.internalUserId },
+            },
+          },
+          {
+            status: PrismaStatus.COMPLETED,
+            responses: {
+              some: { responderId: ctx.internalUserId },
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -85,34 +101,51 @@ export const feedbackRouter = createTRPCRouter({
         createdAt: true,
         contentText: true,
         contentUrl: true,
-        requester: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }, // MODIFIED: Added imageUrl
+        requester: { select: { id: true, firstName: true, lastName: true, imageUrl: true } },
         targetCommunities: { select: { community: { select: { id: true, name: true } } } },
+        // No need to select responses here if only used for filtering
       },
       orderBy: {
-        createdAt: "asc", 
+        createdAt: "asc", // Initial sort by date, will be re-sorted by status later
       },
     });
 
-    const mappedRequests = availableRequests.map(req => {
-        // Define type for tc explicitly
+    // Map to frontend type
+    const mappedRequests = requestsFromDb.map(req => {
         type TargetCommunity = { community: Pick<Community, 'id' | 'name'> };
         const relevantCommunity = req.targetCommunities.find((tc: TargetCommunity) => communityIds.includes(tc.community.id));
         return {
           id: req.id,
           type: mapPrismaToRequestType(req.requestType),
-          status: mapPrismaToRequestStatus(req.status),
+          status: mapPrismaToRequestStatus(req.status), // This is RequestStatus (string literal)
           createdAt: req.createdAt,
           requester: {
             id: req.requester.id, 
             firstName: req.requester.firstName,
             lastName: req.requester.lastName,
-            imageUrl: req.requester.imageUrl, // ADDED: Pass imageUrl to the mapped response
+            imageUrl: req.requester.imageUrl,
           },
           communityId: relevantCommunity?.community.id ?? 'unknown',
           communityName: relevantCommunity?.community.name ?? 'Unknown Community',
           context: req.contentText ?? req.contentUrl ?? undefined,
         }
     });
+
+    // Custom sort: PENDING > IN_PROGRESS > COMPLETED, then by createdAt ascending
+    const statusOrder: Record<AvailableRequestItem['status'], number> = {
+      pending: 1,
+      in_progress: 2,
+      completed: 3,
+    };
+
+    mappedRequests.sort((a, b) => {
+      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (statusDiff !== 0) {
+        return statusDiff;
+      }
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+
     return mappedRequests;
   }),
 
