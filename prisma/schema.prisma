@@ -18,6 +18,7 @@ model User {
   firstName              String?
   imageUrl               String?
   lastName               String?
+  bio                    String?              @db.Text
   hasCompletedOnboarding Boolean              @default(false)
   evaluationsMade        FeedbackEvaluation[] @relation("EvaluatorEvaluations")
   requestsMade           FeedbackRequest[]    @relation("RequesterRequests")
