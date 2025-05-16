@@ -13,21 +13,15 @@ export function Navbar() {
               SkillSwap
             </Link>
           </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
-                <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-                  Skill Requests
-                </Button>
-              </Link>
-              <Link href="/communities">
-                <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-                  Communities
-                </Button>
-              </Link>
-            <Link href="/request">
-              <Button className="flex items-center bg-[#0E3638] hover:bg-[#0E3638]/90">
-                <Plus className="h-4 w-4 mr-2" />
-                Request Feedback
+          <div className="flex items-center space-x-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/communities">
+              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                Communities
               </Button>
             </Link>
             <SignOutButton redirectUrl="/">
