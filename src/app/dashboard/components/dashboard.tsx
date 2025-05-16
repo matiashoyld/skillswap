@@ -273,7 +273,7 @@ export function Dashboard({
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <Tabs defaultValue="my-requests" className="w-full">
+          <Tabs defaultValue="give-feedback" className="w-full">
             <TabsList className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground mb-6">
               <TabsTrigger 
                 value="my-requests" 
