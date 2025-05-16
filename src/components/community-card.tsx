@@ -46,7 +46,7 @@ export function CommunityCard({ community, isJoined, onJoin, onLeave }: Communit
               onClick={onLeave}
             >
               <UserMinus className="h-4 w-4 mr-2" />
-              Unjoin
+              Joined
             </Button>
           ) : (
             <Button
