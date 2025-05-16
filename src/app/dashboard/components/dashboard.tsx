@@ -196,7 +196,7 @@ export function Dashboard({
                 <TabsContent value="my-requests">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-semibold text-gray-900">Your Feedback Requests</h2>
+                      <h2 className="text-xl font-semibold text-gray-900">My Requests</h2>
                       <Link href="/dashboard/request-feedback">
                         <Button variant="default" className="flex items-center bg-[#0E3638] hover:bg-[#0E3638]/90">
                           <Plus className="h-4 w-4 mr-2" />
