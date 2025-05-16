@@ -281,7 +281,7 @@ export const AvailableRequestsFeed: React.FC = () => {
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
-        <h2 className="text-xl font-semibold text-gray-900">Available Requests</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Give Feedback</h2>
         <div className="flex items-center space-x-2">
           <Select value={selectedCommunityId} onValueChange={(value: string) => setSelectedCommunityId(value)}>
             <SelectTrigger className="w-[180px] pl-8">
