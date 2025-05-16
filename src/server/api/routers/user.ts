@@ -26,6 +26,7 @@ export const userRouter = createTRPCRouter({
         lastName: true,
         imageUrl: true,
         credits: true,
+        bio: true,
         hasCompletedOnboarding: true,
       },
     });
@@ -46,8 +47,32 @@ export const userRouter = createTRPCRouter({
       ...user,
       name: [user.firstName, user.lastName].filter(Boolean).join(' ') || null,
       hasCompletedOnboarding: user.hasCompletedOnboarding ?? false,
+      bio: user.bio ?? null,
     };
   }),
+
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        bio: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.internalUserId) {
+        throw new Error("User not found");
+      }
+
+      return ctx.db.user.update({
+        where: { id: ctx.internalUserId },
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          bio: input.bio,
+        },
+      });
+    }),
 
   completeOnboarding: protectedProcedure
     .input(

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 // Keep these imports as they might be used elsewhere or in future features
-import { useSearchParams /*, useRouter*/ } from "next/navigation" // Removed useRouter
+import { useSearchParams, usePathname } from "next/navigation" // Added usePathname
 import Link from "next/link"
 // Path updated
 import { CreditBalance } from "./credit-balance"
@@ -26,7 +26,6 @@ import {
   Briefcase,
   FileCheck,
   MoreVertical,
-  Settings,
   UserCircle,
   UserPlus,
 } from "lucide-react"
@@ -59,6 +58,30 @@ export function Dashboard({
   const currentUser = initialCurrentUser
   const communities = initialCommunities
   const myRequests = initialMyRequests
+  const [isLoading, setIsLoading] = useState(true)
+  const pathname = usePathname()
+
+  // Effect to handle initial loading
+  useEffect(() => {
+    if (currentUser && communities && myRequests) {
+      setIsLoading(false)
+    }
+  }, [currentUser, communities, myRequests])
+
+  // Effect to handle navigation events
+  useEffect(() => {
+    const handlePopState = () => {
+      // Check if we're returning from the settings page
+      if (pathname === '/dashboard') {
+        setIsLoading(true)
+        // Force a page reload to get fresh data
+        window.location.reload()
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [pathname])
 
   const searchParams = useSearchParams()
   // const router = useRouter() // Removed unused router
@@ -67,6 +90,81 @@ export function Dashboard({
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
+
+  if (isLoading) {
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground mb-6">
+            <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
+            <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse ml-2" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+            <div className="lg:col-span-5">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-8 w-48 bg-gray-200 rounded-md animate-pulse" />
+                  <div className="h-10 w-40 bg-gray-200 rounded-md animate-pulse" />
+                </div>
+
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center space-x-2">
+                            <div className="h-8 w-8 bg-gray-200 rounded-md animate-pulse" />
+                            <div className="h-6 w-32 bg-gray-200 rounded-md animate-pulse" />
+                            <div className="h-6 w-24 bg-gray-200 rounded-md animate-pulse" />
+                          </div>
+                          <div className="h-4 w-16 bg-gray-200 rounded-md animate-pulse" />
+                        </div>
+                        <div className="mt-2 h-4 w-3/4 bg-gray-200 rounded-md animate-pulse" />
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="h-4 w-24 bg-gray-200 rounded-md animate-pulse" />
+                          <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse" />
+                        <div>
+                          <div className="h-5 w-32 bg-gray-200 rounded-md animate-pulse mb-2" />
+                          <div className="h-4 w-40 bg-gray-200 rounded-md animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
+                    </div>
+                    <div className="h-16 w-full bg-gray-200 rounded-md animate-pulse" />
+                    <div className="h-9 w-full bg-gray-200 rounded-md animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="h-5 w-32 bg-gray-200 rounded-md animate-pulse" />
+                    <div className="h-8 w-full bg-gray-200 rounded-md animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault()
@@ -310,21 +408,12 @@ export function Dashboard({
                             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                               <div className="py-1" role="menu">
                                 <Link
-                                  href={`/user/${currentUser.id}`}
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                  role="menuitem"
-                                  onClick={() => setShowUserMenu(false)}
-                                >
-                                  <UserCircle className="h-4 w-4 mr-2" />
-                                  View Profile
-                                </Link>
-                                <Link
                                   href="/settings"
                                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                   role="menuitem"
                                   onClick={() => setShowUserMenu(false)}
                                 >
-                                  <Settings className="h-4 w-4 mr-2" />
+                                  <UserCircle className="h-4 w-4 mr-2" />
                                   Settings
                                 </Link>
                               </div>
@@ -334,7 +423,7 @@ export function Dashboard({
                       </div>
 
                       <p className="text-sm text-gray-600">
-                        &quot;Hi, I&apos;m a professional looking to give and receive feedback!&quot;
+                        {currentUser.bio ?? "Hi, I'm a professional looking to give and receive feedback!"}
                       </p>
 
                       <Button

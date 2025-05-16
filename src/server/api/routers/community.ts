@@ -106,6 +106,7 @@ export const communityRouter = createTRPCRouter({
               lastName: true,
               email: true,
               imageUrl: true,
+              bio: true,
             },
           });
 

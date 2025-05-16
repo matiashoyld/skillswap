@@ -182,6 +182,7 @@ export type DashboardUser = {
   firstName: string | null;
   lastName: string | null;
   imageUrl: string | null;
+  bio: string | null;
   credits: number;
   name: string | null; // Added computed name field
   hasCompletedOnboarding: boolean;

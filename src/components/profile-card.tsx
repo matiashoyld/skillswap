@@ -6,7 +6,7 @@ interface ProfileCardProps {
   firstName: string | null;
   lastName: string | null;
   email: string;
-  aboutMe?: string;
+  bio?: string | null;
   communities: string[];
   feedbackGiven: number;
   memberSince: Date;
@@ -17,7 +17,7 @@ export function ProfileCard({
   firstName,
   lastName,
   email,
-  aboutMe = "Hi, I'm a professional looking to give and receive feedback!",
+  bio,
   communities,
   feedbackGiven,
   memberSince,
@@ -44,7 +44,9 @@ export function ProfileCard({
       <p className="text-gray-600 mb-4">{email}</p>
 
       {/* About Me */}
-      <p className="text-gray-600 text-center mb-4">{aboutMe}</p>
+      <p className="text-gray-600 text-center mb-4">
+        {bio ?? "Hi, I'm a professional looking to give and receive feedback!"}
+      </p>
 
       {/* Communities */}
       <div className="flex flex-wrap gap-2 justify-center mb-4">

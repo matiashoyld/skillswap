@@ -68,6 +68,7 @@ export default function CommunityDetailPage() {
               firstName={member.firstName}
               lastName={member.lastName}
               email={member.email}
+              bio={member.bio}
               communities={member.communities}
               feedbackGiven={member.feedbackGiven}
               memberSince={member.memberSince}
