@@ -16,7 +16,6 @@ export function ProfileCard({
   imageUrl,
   firstName,
   lastName,
-  email,
   aboutMe = "", // Empty for now. May allow bios later
   communities,
   feedbackGiven,
@@ -41,7 +40,6 @@ export function ProfileCard({
 
       {/* Name and Contact */}
       <h3 className="text-xl font-semibold text-gray-900 mb-1">{fullName}</h3>
-      <p className="text-gray-600 mb-4">{email}</p>
 
       {/* About Me */}
       <p className="text-gray-600 text-center mb-4">{aboutMe}</p>
