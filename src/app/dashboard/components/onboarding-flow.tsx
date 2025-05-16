@@ -66,8 +66,8 @@ export function OnboardingFlow({ communities }: OnboardingFlowProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-2xl my-8">
         <CardHeader className="text-center pb-2">
           <CardTitle className="flex items-center justify-center text-2xl">
             <Sparkles className="h-6 w-6 text-brand-primary mr-2" />
