@@ -7,6 +7,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 
 // Renamed from SelectCommunitiesPage, contains the original page logic
 export default function SelectCommunitiesClientContent() { 
@@ -108,6 +109,12 @@ export default function SelectCommunitiesClientContent() {
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
+      <div className="mb-6">
+        <Button variant="ghost" onClick={() => router.back()} className="flex items-center gap-2">
+          <ChevronLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Select Communities</CardTitle>
