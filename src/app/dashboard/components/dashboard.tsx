@@ -333,9 +333,9 @@ export function Dashboard({
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-600">
+                      {/* <p className="text-sm text-gray-600">
                         &quot;Hi, I&apos;m a professional looking to give and receive feedback!&quot;
-                      </p>
+                      </p> */}
 
                       <Button
                         variant="outline"

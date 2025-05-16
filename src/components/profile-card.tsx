@@ -17,7 +17,7 @@ export function ProfileCard({
   firstName,
   lastName,
   email,
-  aboutMe = "Hi, I'm a professional looking to give and receive feedback!",
+  aboutMe = "", // Empty for now. May allow bios later
   communities,
   feedbackGiven,
   memberSince,
