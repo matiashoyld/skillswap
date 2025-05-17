@@ -488,4 +488,41 @@ export const feedbackRouter = createTRPCRouter({
 
       return { success: true, requestId: request.id };
     }),
+
+  flagResponse: protectedProcedure
+    .input(z.object({
+      responseId: z.string(),
+      reason: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { responseId, reason } = input;
+
+      // Verify the response exists
+      const response = await ctx.db.feedbackResponse.findUnique({
+        where: { id: responseId },
+        include: {
+          request: true,
+        },
+      });
+
+      if (!response) {
+        throw new Error("Feedback response not found.");
+      }
+
+      // Verify the user is either the requester or the responder
+      if (response.request.requesterId !== ctx.internalUserId && response.responderId !== ctx.internalUserId) {
+        throw new Error("Unauthorized: You can only flag responses to your own requests or responses you've made.");
+      }
+
+      // Update the response with flag information
+      await ctx.db.feedbackResponse.update({
+        where: { id: responseId },
+        data: {
+          isFlagged: true,
+          flagReason: reason,
+        },
+      });
+
+      return { success: true };
+    }),
 }); 

@@ -13,6 +13,7 @@ import {
   FileCheck,
   Star as StarIcon,
   Loader2,
+  Flag as FlagIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { RequestContentDisplay } from "~/app/dashboard/give-feedback/[requestId]/components/RequestContentDisplay";
@@ -27,6 +28,15 @@ import { mapPrismaToRating } from "~/types";
 import type { mapPrismaToRequestType, mapPrismaToRequestStatus } from "~/types";
 import { Badge } from "~/components/ui/badge";
 import type { FeedbackEvaluation, FeedbackResponse, User as PrismaUser, Community as PrismaCommunity } from "@prisma/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 
 // Helper function to map RequestType to icon
 const getRequestTypeIcon = (type: string) => {
@@ -101,6 +111,7 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
 }) => {
   const [rating, setRating] = useState<FeedbackRating | null>(currentRating);
   const [evaluationText, setEvaluationText] = useState(currentEvaluationText ?? "");
+  const [isFlagDialogOpen, setIsFlagDialogOpen] = useState(false);
   const utils = api.useUtils();
 
   const submitEvaluationMutation = api.feedback.submitEvaluation.useMutation({
@@ -114,6 +125,18 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
     onError: (error) => {
       toast.error("Evaluation Failed", {
         description: error.message || "Could not submit evaluation. Please try again.",
+      });
+    },
+  });
+
+  const flagResponseMutation = api.feedback.flagResponse.useMutation({
+    onSuccess: () => {
+      toast.success("Response has been flagged for review.");
+      setIsFlagDialogOpen(false);
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Failed to flag response", {
+        description: error.message,
       });
     },
   });
@@ -196,7 +219,53 @@ const FeedbackEvaluationForm: React.FC<FeedbackEvaluationFormProps> = ({
           disabled={submitEvaluationMutation.isPending}
         />
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-2">
+        <Dialog open={isFlagDialogOpen} onOpenChange={setIsFlagDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-red-500"
+            >
+              <FlagIcon className="h-4 w-4 mr-1" />
+              Flag
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Report Feedback</DialogTitle>
+              <DialogDescription>
+                This will send the feedback to our team for review. Please confirm that you want to report this feedback.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsFlagDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  flagResponseMutation.mutate({
+                    responseId: feedbackResponseId,
+                    reason: "Inappropriate content",
+                  });
+                }}
+                disabled={flagResponseMutation.isPending}
+              >
+                {flagResponseMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Confirm Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <Button type="submit" disabled={!rating || submitEvaluationMutation.isPending} className="bg-brand-primary hover:bg-brand-primary/90">
           {submitEvaluationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Submit Evaluation
