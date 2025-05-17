@@ -88,6 +88,8 @@ model FeedbackResponse {
   evaluation   FeedbackEvaluation?
   request      FeedbackRequest     @relation(fields: [requestId], references: [id], onDelete: Cascade)
   responder    User                @relation("ResponderResponses", fields: [responderId], references: [id], onDelete: Cascade)
+  isFlagged    Boolean             @default(false)
+  flagReason   String?
 
   @@index([requestId])
   @@index([responderId])
