@@ -285,7 +285,6 @@ export const AvailableRequestsFeed: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Select value={selectedCommunityId} onValueChange={(value: string) => setSelectedCommunityId(value)}>
             <SelectTrigger className="w-[180px] pl-8">
-              <Filter className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               <SelectValue placeholder="Filter Community" />
             </SelectTrigger>
             <SelectContent>
@@ -300,7 +299,6 @@ export const AvailableRequestsFeed: React.FC = () => {
 
           <Select value={selectedType} onValueChange={(value: string) => setSelectedType(value)}>
             <SelectTrigger className="w-[150px] pl-8">
-              <Filter className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               <SelectValue placeholder="Filter Type" />
             </SelectTrigger>
             <SelectContent>
