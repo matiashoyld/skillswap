@@ -87,7 +87,7 @@ export const RequestFeedbackForm: React.FC<RequestFeedbackFormProps> = ({ commun
         <Button asChild variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
           <Link href="/dashboard">
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            Dashboard
           </Link>
         </Button>
       </div>

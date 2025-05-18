@@ -152,7 +152,7 @@ export const GiveFeedbackForm: React.FC<GiveFeedbackFormProps> = ({ request }) =
             <Button asChild variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
                 <Link href="/dashboard?tab=give-feedback">
                     <ChevronLeft className="h-4 w-4 mr-1" />
-                    Back to Available Requests
+                    Back
                 </Link>
             </Button>
         </div>

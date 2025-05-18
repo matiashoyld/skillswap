@@ -75,7 +75,7 @@ export default function CommunitiesPage() {
         <Button variant="ghost" asChild>
             <Link href="/dashboard" className="flex items-center gap-2">
               <ChevronLeft className="h-4 w-4" />
-              Back to Dashboard
+              Dashboard
             </Link>
           </Button>
           <h1 className="text-3xl font-bold">Communities</h1>
