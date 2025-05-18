@@ -24,11 +24,6 @@ export function Navbar() {
                 Communities
               </Button>
             </Link>
-            <SignOutButton redirectUrl="/">
-              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-                Sign Out
-              </Button>
-            </SignOutButton>
           </div>
         </div>
       </div>
