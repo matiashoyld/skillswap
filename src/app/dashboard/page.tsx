@@ -53,14 +53,15 @@ export default async function DashboardPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto px-4 py-8" >
-      <h1 className="text-3xl font-bold mb-6 ml-44">Dashboard</h1>
-        <Dashboard
-        
-          initialCurrentUser={dbUser}
-          initialCommunities={communitiesForDashboard}
-          initialMyRequests={myRequests}
-        />
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+          <Dashboard
+            initialCurrentUser={dbUser}
+            initialCommunities={communitiesForDashboard}
+            initialMyRequests={myRequests}
+          />
+        </div>
       </main>
     </>
   );
