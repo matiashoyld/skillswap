@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 // Keep these imports as they might be used elsewhere or in future features
-import { useSearchParams, usePathname } from "next/navigation" // Added usePathname
+import { useSearchParams, usePathname, useRouter } from "next/navigation" // Added usePathname and useRouter
 import Link from "next/link"
 // Path updated
 import { CreditBalance } from "./credit-balance"
@@ -28,6 +28,7 @@ import {
   MoreVertical,
   UserCircle,
   UserPlus,
+  AlertCircle,
 } from "lucide-react"
 // Use relative path for types
 import type {
@@ -60,6 +61,7 @@ export function Dashboard({
   const myRequests = initialMyRequests
   const [isLoading, setIsLoading] = useState(true)
   const pathname = usePathname()
+  const router = useRouter()
 
   // Effect to handle initial loading
   useEffect(() => {
@@ -434,6 +436,15 @@ export function Dashboard({
                       >
                         <UserPlus className="h-4 w-4 mr-2" />
                         Invite a Friend
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full flex items-center justify-center"
+                        onClick={() => router.push("https://docs.google.com/forms/d/e/1FAIpQLSceL439xcJGxtvxCp78IWJjrgOvSa2FiG09LXqduQyLUBo_qA/viewform")}
+                      >
+                        <AlertCircle className="h-4 w-4 mr-2 text-black-500" />
+                        Report Issue
                       </Button>
                     </div>
                   </CardContent>
