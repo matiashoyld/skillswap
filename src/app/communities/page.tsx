@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Navbar } from "~/components/navbar";
 
@@ -70,15 +70,25 @@ export default function CommunitiesPage() {
   return (
     <>
       <Navbar />
+      
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" asChild>
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <ChevronLeft className="h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold">Communities</h1>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Link>
+              </Button>
+              <h1 className="text-3xl font-bold">Communities</h1>
+            </div>
+            <Button variant="outline" className="bg-white text-black border-gray-300" asChild>
+              <Link href="https://docs.google.com/forms/d/e/1FAIpQLSceL439xcJGxtvxCp78IWJjrgOvSa2FiG09LXqduQyLUBo_qA/viewform?usp=sharing&ouid=102282665370596577351" target="_blank" rel="noopener noreferrer">
+                <Plus className="mr-2 h-4 w-4" /> Propose New Community
+              </Link>
+            </Button>
+          </div>
         </div>
         
         {joinedCommunities.length > 0 && (
