@@ -75,12 +75,6 @@ export default function CommunitiesPage() {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard" className="flex items-center gap-2">
-                  <ChevronLeft className="h-4 w-4" />
-                  Back
-                </Link>
-              </Button>
               <h1 className="text-3xl font-bold">Communities</h1>
             </div>
             <Button variant="outline" className="bg-white text-black border-gray-300" asChild>

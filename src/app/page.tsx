@@ -108,22 +108,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
-        <section className="w-full bg-gradient-to-b from-white to-[var(--indigo-50)] py-12 md:py-24 lg:py-32">
-          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
-            <div className="space-y-3">
-              <h2 className="text-3xl font-bold tracking-tighter text-gray-900 md:text-4xl/tight">
-                Latest Activity
-              </h2>
-              <p className="mx-auto max-w-[600px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                See the latest posts and interactions within the community.
-              </p>
-            </div>
-            <div className="mt-4 flex flex-col items-center gap-4">
-              {/* Placeholder for latest activity or remove this section */}
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer className="bg-white px-4 py-12">
