@@ -78,7 +78,7 @@ export default function CommunitiesPage() {
               <h1 className="text-3xl font-bold">Communities</h1>
             </div>
             <Button variant="outline" className="bg-white text-black border-gray-300" asChild>
-              <Link href="https://docs.google.com/forms/d/e/1FAIpQLSceL439xcJGxtvxCp78IWJjrgOvSa2FiG09LXqduQyLUBo_qA/viewform?usp=sharing&ouid=102282665370596577351" target="_blank" rel="noopener noreferrer">
+              <Link href="https://forms.gle/1ZwPtAwLGiuzqWaA7" target="_blank" rel="noopener noreferrer">
                 <Plus className="mr-2 h-4 w-4" /> Propose New Community
               </Link>
             </Button>
